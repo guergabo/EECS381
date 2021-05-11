@@ -15,41 +15,14 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="p1_main.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Room.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Person.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Meeting.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Utility.c">
+    <ClCompile Include="t_main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Ordered_container_list.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Ordered_container_array.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Room.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Meeting.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Person.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Utility.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Ordered_container.h">
       <Filter>Header Files</Filter>
     </ClInclude>

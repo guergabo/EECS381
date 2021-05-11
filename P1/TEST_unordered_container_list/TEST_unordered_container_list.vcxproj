@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{8cb31f21-e973-483a-bf3e-3b17f766edfd}</ProjectGuid>
-    <RootNamespace>Project01</RootNamespace>
+    <ProjectGuid>{65fa2866-8b7f-4cff-b766-ab9069d73c37}</ProjectGuid>
+    <RootNamespace>TESTunorderedcontainerlist</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -139,20 +139,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Meeting.c" />
-    <ClCompile Include="Ordered_container_array.c" />
     <ClCompile Include="Ordered_container_list.c" />
-    <ClCompile Include="p1_main.c" />
-    <ClCompile Include="Person.c" />
-    <ClCompile Include="Room.c" />
-    <ClCompile Include="Utility.c" />
+    <ClCompile Include="t_main.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Meeting.h" />
     <ClInclude Include="Ordered_container.h" />
-    <ClInclude Include="Person.h" />
-    <ClInclude Include="Room.h" />
-    <ClInclude Include="Utility.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
