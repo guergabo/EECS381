@@ -97,7 +97,6 @@ if first data object should come before, is equal to, or comes after, the second
 items pointing to the data objects are then placed in the corresponding order in the container.*/
 typedef int (*OC_comp_fp_t) (const void* data_ptr1, const void* data_ptr2); /* naming a function pointer */
 
-
 /*
 Functions for the entire container.
 */
