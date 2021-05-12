@@ -1,7 +1,2 @@
-﻿  Ordered_container_list.c
-  t_main.c
-C:\Users\Gabriel\Desktop\C_C++\381\P1\TEST_unordered_container_list\t_main.c(6,8): warning C4013: 'pritnf' undefined; assuming extern returning int
-  Generating Code...
-t_main.obj : error LNK2019: unresolved external symbol _pritnf referenced in function _main
-C:\Users\Gabriel\Desktop\C_C++\381\P1\TEST_unordered_container_list\Debug\TEST_unordered_container_list.exe : fatal error LNK1120: 1 unresolved externals
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppCommon.targets(876,5): error MSB6006: "link.exe" exited with code 1120.
+﻿  t_main.c
+  TEST_unordered_container_list.vcxproj -> C:\Users\Gabriel\Desktop\C_C++\381\P1\TEST_unordered_container_list\Debug\TEST_unordered_container_list.exe

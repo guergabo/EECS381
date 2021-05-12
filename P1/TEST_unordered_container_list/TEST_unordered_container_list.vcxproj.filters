@@ -21,9 +21,15 @@
     <ClCompile Include="Ordered_container_list.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Utility.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Ordered_container.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
