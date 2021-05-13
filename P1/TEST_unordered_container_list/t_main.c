@@ -22,10 +22,10 @@
 	}
 */
 
-/* malloc / free :: */
+/* malloc / free :: casting to before returning */
 /* Opaque type :: is a type whose implementation is hidden from the user. Only way to access 
 is through a poitner interface exposwed in the API */
-/* Pointers to Struct :: */
+/* Pointers to Struct :: simply treat a struct or class as a self-defined type */
 /* Void Pointers :: the generic pointer type can be used for any type because it is uncommitted */
 /* insertion doubly linked-list :: */
 
@@ -36,7 +36,6 @@ is through a poitner interface exposwed in the API */
 /* Libraries */
 #include <stdio.h>  /* defines NULL */
 #include <stdlib.h> /* standard library, includes malloc/free */
-
 
 
 int main() {
@@ -52,16 +51,33 @@ int main() {
 	struct Ordered_container* container;
 
 	/* we can use the function pointer typedefs in Ordered_container.h
-	instead of writing out the casts ourselves */
+	instead of writing out the casts ourselves.
+	test : function should create a container. */
 	container = OC_create_container(compare_string);
 
-	/*	container = OC_create_container((OC_comp_fp_t)compare_string); */
+	/*	container = OC_create_container((OC_comp_fp_t)compare_string); 
+	test : function should return size of the container as an integer */
 	printf("size is %d\n", OC_get_size(container));
+
+	/* test : function should return 1 if the container is empty */
 	if (OC_empty(container)) { printf("container is empty.\n");  }
 
 	/* fill the container of s1, s2, s3, s4 but insert in this order: s3, s1, s4, s2,
 	and see if the strings get put in the right order. */
+	
+	OC_insert(container, s1);
+	OC_insert(container, s2);
+	
+	OC_insert(container, s3);
+	OC_insert(container, s1);
+	OC_insert(container, s4); 
+	OC_insert(container, s2);
 
+	OC_insert(container, s1);
+	OC_insert(container, s2);
+
+	/* print out order */
+	printf("size is %d\n", OC_get_size(container));
 	printf("Done\n");
 
 	return 0;

@@ -1,2 +1,3 @@
-﻿  t_main.c
+﻿  Ordered_container_list.c
+C:\Users\Gabriel\Desktop\C_C++\381\P1\TEST_unordered_container_list\Ordered_container_list.c(223,27): warning C4090: '=': different 'const' qualifiers
   TEST_unordered_container_list.vcxproj -> C:\Users\Gabriel\Desktop\C_C++\381\P1\TEST_unordered_container_list\Debug\TEST_unordered_container_list.exe

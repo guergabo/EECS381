@@ -76,11 +76,13 @@ Functions for the entire container.
 struct Ordered_container* OC_create_container(OC_comp_fp_t f_ptr) {
 	/* create data structure on the heap */
 	struct Ordered_container* container = safe_malloc(sizeof(struct Ordered_container));
+
 	/* initialize contain variables */
 	container->comp_func = f_ptr;
 	container->first = NULL;
 	container->last = NULL;
 	container->size = 0; 
+
 	/* update the number of Ordered_containers currently allocated */
 	++g_Container_count;
 
@@ -93,13 +95,16 @@ After this call, the container pointer value must not be used again.*/
 void OC_destroy_container(struct Ordered_container* c_ptr) {
 	/* free the dynamically allocated items */
 	OC_clear(c_ptr);
+
 	/* free the dynamically allocated container */
 	free(c_ptr);
+
 	/* If expression evaluates to true, assert() does nothing If expression 
 	evaluates to false, assert() displays an error message on stderr 
 	(standard error stream to display error messages) and aborts program 
 	execution */
 	assert(g_Container_count > 0);
+
 	/* update the number of Ordered_containers currently allocated */
 	--g_Container_count; 
 }
@@ -117,9 +122,11 @@ void OC_clear(struct Ordered_container* c_ptr) {
 		/* free current node */
 		free(temp);
 	}
+
 	/* update the globals */
 	g_Container_items_in_use -= c_ptr->size;
 	g_Container_items_allocated -= c_ptr->size; 
+
 	/* re-initialize the Ordered_container */
 	c_ptr->first = NULL;
 	c_ptr->last = NULL;
@@ -142,6 +149,31 @@ int OC_empty(const struct Ordered_container* c_ptr) {
 Functions for working with individual items in the container.
 */
 
+/* Get the data object pointer from an item. */
+void* OC_get_data_ptr(const void* item_ptr) {
+	/* client side - when you get a data pointer out of the container, you have 
+	to case th void* to the correct type in order to access the data 
+	in the object because it is forever an incomplete type. Pointer is just 
+	an address in memory. void poitners has no type information associated
+	with it. Therefore, the computer does not know how many bytes this pointer
+	point to. Because a void pointer has no data type, that creates a problem 
+	for the compiler to predict the size of the pointed object. So before
+	dereference to we have to typecast it to help the compiler out */
+
+	/* why are void pointer used?
+	A very important feature of the void pointer is reusability. Using the void pointer
+	can store the address of any object and whenever required we can get back the 
+	object through the indirection operator with proper casting. */
+
+	/* item_ptr-> == (*item_ptr. ), in the process of accessing you are dereferencing */
+	return ((struct LL_Node*)item_ptr)->data_ptr; 
+}
+
+/* Delete the specified item.
+Caller is responsible for any deletion of the data pointed to by the item. */
+void OC_delete_item(struct Ordered_container* c_ptr, void* item_ptr) {
+	
+}
 
 /*
 Functions that search and insert into the container using the supplied comparison function.
@@ -152,9 +184,64 @@ If there is already an item in the container that compares equal to new item acc
 the comparison function, the insertion will not take place and 0 is returned to indicate failure.
 Otherwise, the insertion is done and non-zero is returned to show success.
 This function will not modify the pointed-to data. */
+
+
+/* helper functions */
+int find_position(struct Ordered_container* c_ptr, struct LL_Node** current_node, struct LL_Node* item) {
+	/* find position and return results to determien proper insertion method */
+	int results; 
+	while (results = c_ptr->comp_func(item->data_ptr, (*current_node)->data_ptr)) {
+		if ((*current_node)->next == NULL)
+			break;
+		*current_node = (*current_node)->next;
+	}
+	return results; 
+}
+
+void insert_before(struct Ordered_container* c_ptr, struct LL_Node* current_node, struct LL_Node* item) {
+	item->prev = current_node->prev; /* guaranteed move */
+	item->next = current_node;       /* guaranteed move */
+	if (current_node->prev == NULL) {
+		c_ptr->first = item;
+	} else {
+		current_node->prev->next = item;
+	}
+	current_node->prev = item; /* guaranteed move, after done using prev */
+}
+
+void insert_after(struct Ordered_container* c_ptr, struct LL_Node* current_node, struct LL_Node* item) {
+	item->prev = current_node;
+	item->next = current_node->next;
+	c_ptr->last = item;
+	current_node->next = item;
+}
+
 int OC_insert(struct Ordered_container* c_ptr, const void* data_ptr) {
-
-
+	/* create new item for specified data_ptr */
+	struct LL_Node* item = safe_malloc(sizeof(struct LL_Node));
+	item->data_ptr = data_ptr; 
+	item->next = NULL;
+	item->prev = NULL; 
+	/* search and find correct index, interrupts if found equal or greater */
+	if (OC_empty(c_ptr)) { /* if container is empty */
+		c_ptr->first = item;  
+		c_ptr->last = item;  
+	} else { 
+		struct LL_Node* current_node = c_ptr->first; 
+		/* only breaks if 0 (equal) or -1 (less) than returns */
+		int results = find_position(c_ptr, &current_node, item);
+		/* break with results 0 (matching item, do nothing) */
+		if (results == 0) { return 0; }
+		/* break with -1 (found larger one), fit before  */
+		if (results < 0) { insert_before(c_ptr, current_node, item); }
+		/* break with results 1 (no larger one, reached end), fit after tail */
+		else { insert_after(c_ptr, current_node, item); }
+	}
+	/* increase size of Ordered_container and globals */
+	++(c_ptr->size);
+	++g_Container_items_in_use;
+	++g_Container_items_allocated;
+	/* success, no matching item */
 	return 1; 
 }
 
@@ -164,7 +251,15 @@ The data_ptr object is assumed to be of the same type as the data objects pointe
 NULL is returned if no matching item is found.
 The pointed-to data will not be modified. */
 void* OC_find_item(const struct Ordered_container* c_ptr, const void* data_ptr) {
-
+	struct LL_Node* current = c_ptr->first;
+	/* break if NULL, or 0 */
+	while (current) {
+		/* success, found node */
+		if (current->data_ptr == data_ptr) { return current; }
+		current = current->next; 
+	}
+	/* failure, no matching item */
+	return NULL; 
 }
 
 /* Return a pointer to the item that points to data that matches the supplied argument given by arg_ptr
@@ -176,7 +271,13 @@ unspecified which one is returned. The comparison function must implement an ord
 with the ordering produced by the comparison function specified when the container was created;
 if not, the result is undefined. */
 void* OC_find_item_arg(const struct Ordered_container* c_ptr, const void* arg_ptr, OC_find_item_arg_fp_t fafp) {
+	struct LL_Node* current = c_ptr->first; 
 
+	/* success */
+	return current; 
+
+	/* failure, no matching item */
+	return NULL;
 }
 
 
