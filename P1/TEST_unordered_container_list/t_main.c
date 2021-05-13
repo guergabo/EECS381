@@ -18,6 +18,8 @@
 		// invoking fun() using fun_ptr
 		(*fun_ptr)(10); // "Value of a is 10" 
 
+		// same, function calls gets you the function's address 
+		fun_ptr(10);
 		return 0;
 	}
 */
@@ -27,7 +29,9 @@
 is through a poitner interface exposwed in the API */
 /* Pointers to Struct :: simply treat a struct or class as a self-defined type */
 /* Void Pointers :: the generic pointer type can be used for any type because it is uncommitted */
-/* insertion doubly linked-list :: */
+/* insertion doubly linked-list :: 
+
+*/
 
 /* Interfaces */
 #include "Utility.h"

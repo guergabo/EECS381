@@ -144,13 +144,13 @@ Functions for working with individual items in the container.
 /* Get the data object pointer from an item. */
 void* OC_get_data_ptr(const void* item_ptr) {
 	/* client side - when you get a data pointer out of the container, you have 
-	to case th void* to the correct type in order to access the data 
+	to cast th void* to the correct type in order to access the data 
 	in the object because it is forever an incomplete type. Pointer is just 
-	an address in memory. void poitners has no type information associated
+	an address in memory. void pointers has no type information associated
 	with it. Therefore, the computer does not know how many bytes this pointer
-	point to. Because a void pointer has no data type, that creates a problem 
+	points to. Because a void pointer has no data type, that creates a problem 
 	for the compiler to predict the size of the pointed object. So before
-	dereference to we have to typecast it to help the compiler out */
+	dereferencing we have to typecast it to help the compiler out */
 
 	/* why are void pointer used?
 	A very important feature of the void pointer is reusability. Using the void pointer

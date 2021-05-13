@@ -7,7 +7,7 @@
 /* compares strings, returns 0 if equal, less than 0 if the 
 first is less than second, and greater than 0 if first is greater second */
 int compare_string(const void* data_ptr1, const void* data_ptr2) {
-	return strcmp(data_ptr1, data_ptr2);
+	return strcmp((char*)data_ptr1, (char*)data_ptr2);
 }
 
 /* safe malloc function */
