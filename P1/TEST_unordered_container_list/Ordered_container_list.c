@@ -76,16 +76,13 @@ Functions for the entire container.
 struct Ordered_container* OC_create_container(OC_comp_fp_t f_ptr) {
 	/* create data structure on the heap */
 	struct Ordered_container* container = safe_malloc(sizeof(struct Ordered_container));
-
 	/* initialize contain variables */
 	container->comp_func = f_ptr;
 	container->first = NULL;
 	container->last = NULL;
 	container->size = 0; 
-
 	/* update the number of Ordered_containers currently allocated */
 	++g_Container_count;
-
 	return container; 
 }
 
@@ -95,16 +92,13 @@ After this call, the container pointer value must not be used again.*/
 void OC_destroy_container(struct Ordered_container* c_ptr) {
 	/* free the dynamically allocated items */
 	OC_clear(c_ptr);
-
 	/* free the dynamically allocated container */
 	free(c_ptr);
-
 	/* If expression evaluates to true, assert() does nothing If expression 
 	evaluates to false, assert() displays an error message on stderr 
 	(standard error stream to display error messages) and aborts program 
 	execution */
 	assert(g_Container_count > 0);
-
 	/* update the number of Ordered_containers currently allocated */
 	--g_Container_count; 
 }
@@ -122,11 +116,9 @@ void OC_clear(struct Ordered_container* c_ptr) {
 		/* free current node */
 		free(temp);
 	}
-
 	/* update the globals */
 	g_Container_items_in_use -= c_ptr->size;
 	g_Container_items_allocated -= c_ptr->size; 
-
 	/* re-initialize the Ordered_container */
 	c_ptr->first = NULL;
 	c_ptr->last = NULL;
@@ -172,7 +164,28 @@ void* OC_get_data_ptr(const void* item_ptr) {
 /* Delete the specified item.
 Caller is responsible for any deletion of the data pointed to by the item. */
 void OC_delete_item(struct Ordered_container* c_ptr, void* item_ptr) {
-	
+	struct LL_Node* node = (struct LL_Node*)item_ptr; 
+	/* fix head and tail */
+	if (node->prev == NULL) { /* head */
+		c_ptr->first = node->next;
+	} 
+	if (node->next == NULL) { /* tail */
+		c_ptr->last = node->prev;
+	}
+	/* fix bindings */
+	if (node->prev != NULL)
+		node->prev->next = node->next; 
+	if (node->next != NULL)
+		node->next->prev = node->prev; 
+
+	node->prev = NULL; 
+	node->next = NULL; 
+	/* after fixing nodes */
+	free(node);
+	/* update container */
+	--(c_ptr->size);
+	--g_Container_items_allocated;
+	--g_Container_items_in_use;
 }
 
 /*
@@ -190,7 +203,7 @@ This function will not modify the pointed-to data. */
 int find_position(struct Ordered_container* c_ptr, struct LL_Node** current_node, struct LL_Node* item) {
 	/* find position and return results to determien proper insertion method */
 	int results; 
-	while (results = c_ptr->comp_func(item->data_ptr, (*current_node)->data_ptr)) {
+	while ((results = c_ptr->comp_func(item->data_ptr, (*current_node)->data_ptr)) > 0) {
 		if ((*current_node)->next == NULL)
 			break;
 		*current_node = (*current_node)->next;
@@ -273,9 +286,11 @@ if not, the result is undefined. */
 void* OC_find_item_arg(const struct Ordered_container* c_ptr, const void* arg_ptr, OC_find_item_arg_fp_t fafp) {
 	struct LL_Node* current = c_ptr->first; 
 
-	/* success */
-	return current; 
-
+	while (current) {
+		/* success */
+		if (fafp(arg_ptr, current->data_ptr) == 0) { return current; }
+		current = current->next; 
+	}
 	/* failure, no matching item */
 	return NULL;
 }
@@ -284,3 +299,57 @@ void* OC_find_item_arg(const struct Ordered_container* c_ptr, const void* arg_pt
 /*
 Functions that traverse the items in the container, processing each item in order.
 */
+
+/* Apply the supplied function to the data pointer in each item of the container.
+The contents of the container cannot be modified. */
+void OC_apply(const struct Ordered_container* c_ptr, OC_apply_fp_t afp) {
+	struct LL_Node* node = c_ptr->first; 
+	while (node) {
+		/* apply function given to data pointer */
+		afp(node->data_ptr);
+		node = node->next; 
+	}
+}
+
+/* Apply the supplied function to the data pointer in each item in the container.
+If the function returns non-zero, the iteration is terminated, and that value
+returned. Otherwise, zero is returned. The contents of the container cannot be modified. */
+int OC_apply_if(const struct Ordered_container* c_ptr, OC_apply_if_fp_t afp) {
+	struct LL_Node* node = c_ptr->first; 
+	while (node) {
+		/* apply function with conditional */
+		int result = afp(node->data_ptr);
+		if (result != 0) { return result; }
+		node = node->next; 
+	}
+	return 0; 
+}
+
+
+/* Apply the supplied function to the data pointer in each item in the container;
+the function takes a second argument, which is the supplied void pointer.
+The contents of the container cannot be modified. */
+void OC_apply_arg(const struct Ordered_container* c_ptr, OC_apply_arg_fp_t afp, void* arg_ptr) {
+	struct LL_Node* node = c_ptr->first; 
+	while (node) {
+		/* apply function with two arguments */
+		afp(node->data_ptr, arg_ptr);
+		node = node->next;
+	}
+}
+
+
+/* Apply the supplied function to the data pointer in each item in the container;
+the function takes a second argument, which is the supplied void pointer.
+If the function returns non-zero, the iteration is terminated, and that value
+returned. Otherwise, zero is returned. The contents of the container cannot be modified */
+int OC_apply_if_arg(const struct Ordered_container* c_ptr, OC_apply_if_arg_fp_t afp, void* arg_ptr) {
+	struct LL_Node* node = c_ptr->first;
+	while (node) {
+		/* apply function with two argumetns and conditional */
+		int result = afp(node->data_ptr, arg_ptr);
+		if (result != 0) { return result; }
+		node = node->next; 
+	}
+	return 0; 
+}

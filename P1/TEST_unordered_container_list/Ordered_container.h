@@ -172,5 +172,53 @@ void* OC_find_item_arg(const struct Ordered_container* c_ptr, const void* arg_pt
 Functions that traverse the items in the container, processing each item in order.
 */
 
+/* Type of a function used by OC_apply.
+An apply function takes a data pointer as an argument, and returns void.
+It is allowed to modify the data object, but if the ordering information is changed,
+the effects of attempting to search the container afterwards with OC_find are undefined. */
+typedef void (*OC_apply_fp_t) (void* data_ptr);
+
+/* Apply the supplied function to the data pointer in each item of the container.
+The contents of the container cannot be modified. */
+void OC_apply(const struct Ordered_container* c_ptr, OC_apply_fp_t afp);
+
+/* Type of a function used by OC_apply_if.
+An apply_if function takes a data pointer as an argument, and returns zero or non-zero.
+It is allowed to modify the data object, but if the ordering information is changed,
+the effects of attempting to search the container afterwards with OC_find are undefined. */
+typedef int (*OC_apply_if_fp_t) (void* data_ptr);
+
+/* Apply the supplied function to the data pointer in each item in the container.
+If the function returns non-zero, the iteration is terminated, and that value
+returned. Otherwise, zero is returned. The contents of the container cannot be modified. */
+int OC_apply_if(const struct Ordered_container* c_ptr, OC_apply_if_fp_t afp);
+
+/* Type of a function used by OC_apply_arg.
+An OC_apply_arg function takes a data pointer as the first argument,
+a supplied argument pointer as a second argument, and returns void.
+It is allowed to modify the pointed-to argument, or the data object,
+but if the ordering information is changed, the effects of attempting to search
+the container afterwards with OC_find are undefined. */
+typedef void (*OC_apply_arg_fp_t) (void* data_ptr, void* arg_ptr);
+
+/* Apply the supplied function to the data pointer in each item in the container;
+the function takes a second argument, which is the supplied void pointer.
+The contents of the container cannot be modified. */
+void OC_apply_arg(const struct Ordered_container* c_ptr, OC_apply_arg_fp_t afp, void* arg_ptr);
+
+/* Type of a function used by OC_apply_if_arg.
+An OC_apply_arg function takes a data pointer as an argument,
+a supplied argument pointer as a second argument, and returns an zero or non-zero.
+It is allowed to modify the pointed-to argument, or the data object,
+but if the ordering information is changed, the effects of attempting to search
+the container afterwards with OC_find are undefined. */
+typedef int (*OC_apply_if_arg_fp_t) (void* data_ptr, void* arg_ptr);
+
+/* Apply the supplied function to the data pointer in each item in the container;
+the function takes a second argument, which is the supplied void pointer.
+If the function returns non-zero, the iteration is terminated, and that value
+returned. Otherwise, zero is returned. The contents of the container cannot be modified */
+int OC_apply_if_arg(const struct Ordered_container* c_ptr, OC_apply_if_arg_fp_t afp, void* arg_ptr);
+
 
 #endif
