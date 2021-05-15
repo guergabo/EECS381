@@ -11,6 +11,7 @@
 
 
 /* Reminder Definitions */
+/* Globals :: extern, where from ... */
 /* C-string ::  
 	int strlen(char* s){
 		char*p = s; 

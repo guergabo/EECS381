@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #define INITIAL_ARRAY_SIZE 3
 #define GROW_ARRAY_FACTOR 2
@@ -73,6 +74,7 @@ struct Ordered_container {
 	int size;				/* number of items currently in the array */
 };
 
+
 /*
 Functions for the entire container.
 */
@@ -94,14 +96,15 @@ struct Ordered_container* OC_create_container(OC_comp_fp_t f_ptr) {
 deleting all pointed-to data before calling this function.
 After this call, the container pointer value must not be used again.*/
 void OC_destroy_container(struct Ordered_container* c_ptr) {
-	/* destroy items */
-	OC_clear(c_ptr); 
+	/* free array */
+	free(c_ptr->array);
 	g_Container_items_in_use -= c_ptr->size;
 	g_Container_items_allocated -= c_ptr->allocation;
 	/* now free the container itself */
 	free(c_ptr);
 	--g_Container_count;
 }
+
 
 /* Delete all the items in the container and initialize it.
 Caller is responsible for deleting any pointed-to data first. */
@@ -111,7 +114,7 @@ void initialize_array(struct Ordered_container* c_ptr) {
 	c_ptr->array = safe_malloc(INITIAL_ARRAY_SIZE * sizeof(void*));
 	c_ptr->allocation = INITIAL_ARRAY_SIZE;
 	c_ptr->size = 0; 
-	
+
 	g_Container_items_allocated += INITIAL_ARRAY_SIZE; 
 }
 
@@ -134,4 +137,53 @@ int OC_empty(const struct Ordered_container* c_ptr) {
 	return (c_ptr->size) == 0; 
 }
 
+/*
+Functions for working with individual items in the container.
+*/
+
+
+/* helper function */
+
+
+/* Get the data object pointer from an item. */
+void* OC_get_data_ptr(const void* item_ptr) {
+	/* check if not null */
+	assert(item_ptr);
+	/* item_ptr is a void pointer pointing to the address of the void pointer in the array */
+	/* therefore, it is a poitner of a void* making it = void** */
+	/* cast it as a void** and dereference is to the not the adress of the void* in th array 
+	but the void* itself. */
+	/* to get data from a double void pointer I have to dereference it */
+	/* fuck a double void pointer... */
+	/* ((*int) ptr)->something == (*((*int) ptr)).something */
+	/* void* can is generic and therefore can take a double void pointer as well */
+	return  *((void**)item_ptr);
+}
+
+/* Delete the specified item.
+Caller is responsible for any deletion of the data pointed to by the item. */
+void OC_delete_item(struct Ordered_container* c_ptr, void* item_ptr) {
+	int size = c_ptr->size; 
+	void** container_ptr = c_ptr->array;
+	void** data_ptr = (void**)item_ptr;
+
+	/* move all elements above deleted element down */
+	/*  0  1  2  3  4  5     6       7  8   */
+	/* [v][v][v][v][v][v][delete v][v1][v2] */
+	/* [v][v][v][v][v][v] [v1][v2][v2]      */
+	/* [v][v][v][v][v][v] [v1][v2][NULL]    */
+	/* contiguous memory so address will be in increasing order */
+	/* guaranteed to be stored in increasing order */
+	/* start from item given and shift everything else down afterwards*/
+	while (data_ptr <= (container_ptr + (size - 1))) {
+		if (data_ptr == (container_ptr + (size - 1))) {
+			data_ptr == NULL;
+			break;
+		}
+		*data_ptr = *(data_ptr + 1);
+		++data_ptr; 
+	}
+	--(c_ptr->size);
+	--g_Container_items_in_use;
+}
 

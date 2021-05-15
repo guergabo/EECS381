@@ -124,6 +124,13 @@ int OC_empty(const struct Ordered_container* c_ptr);
 Functions for working with individual items in the container.
 */
 
+/* Get the data object pointer from an item. */
+void* OC_get_data_ptr(const void* item_ptr);
+
+/* Delete the specified item.
+Caller is responsible for any deletion of the data pointed to by the item. */
+void OC_delete_item(struct Ordered_container* c_ptr, void* item_ptr);
+
 
 /*
 Functions that search and insert into the container using the supplied comparison function.
