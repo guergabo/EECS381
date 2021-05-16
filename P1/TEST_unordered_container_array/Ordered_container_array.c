@@ -221,8 +221,63 @@ If there is already an item in the container that compares equal to new item acc
 the comparison function, the insertion will not take place and 0 is returned to indicate failure.
 Otherwise, the insertion is done and non-zero is returned to show success.
 This function will not modify the pointed-to data. */
-int OC_insert(struct Ordered_container* c_ptr, const void* data_ptr) {
+/* When a new item is to
+be inserted and the array is full, a new array is allocated whose size is double the space required to
+hold the original array plus the new value(new size = 2 * (old size + 1)).This scheme can waste some
+memory space, but results in fairly fast performance because as the container is filled, fewer new
+allocation / copy / deallocate operations are required.But the array normally will have cells that are not
+currently in use; so this implementation has to keep track of how many cells are in use to hold items,
+which is returned by the OC_get_size function, and how many cells are currently allocated — the size of
+the current allocated array.To remove an item, the items that come after the removed one are moved
+"up" by one, but the array is not reallocated — it retains its original size.The only time the array
+is "shrunk" is with the OC_clear function, which discards the entire arrayand starts over with the
+initial small allocation.*/
 
+
+void grow_array(struct Ordered_container* c_ptr) {
+	int bigger_allocation; 
+	void** bigger_array;
+	int i;
+
+	/* have to create new array*/
+	bigger_allocation = GROW_ARRAY_FACTOR + (c_ptr->size + 1);
+	bigger_array = safe_malloc(bigger_allocation * sizeof(void*));
+	/* copy old array into new array */
+	for (i = 0; i < c_ptr->size; ++i) {
+		bigger_array[i] = c_ptr->array[i];
+	}
+	/* free old array */
+	free(c_ptr->array);
+	/* set new array */
+	c_ptr->array = bigger_array;
+	c_ptr->allocation = bigger_allocation;
+	/* update globals */
+	g_Container_items_allocated += (bigger_allocation - c_ptr->size);
+}
+
+int OC_insert(struct Ordered_container* c_ptr, const void* data_ptr) {
+	/* if equal to new item the insertion will not take place */
+	/* advantage of array is that it is contiguous memory */
+	int index = 0, i = 0, result;
+
+	/* if the array is full, grow it */
+	if (c_ptr->size == c_ptr->allocation)
+		grow_array(c_ptr);
+	/* find index to fit the new item */
+	result = binary_finder(c_ptr, data_ptr, c_ptr->comp_fun, &index);
+	if (result) { return 0; } /* already exist with value */
+
+	/* move all element above new item up one */
+	for (i = c_ptr->size; i > index; --i) {
+		c_ptr->array[i] = c_ptr->array[i - 1];
+	}
+	/* insert item */
+	c_ptr->array[index] = data_ptr; 
+	++(c_ptr->size);
+	/* updata globals */
+	++g_Container_items_in_use;
+
+	return 1; 
 }
 
 /* Return a pointer to an item that points to data equal to the data object pointed to by data_ptr,
