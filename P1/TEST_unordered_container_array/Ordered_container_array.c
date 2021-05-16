@@ -142,9 +142,6 @@ Functions for working with individual items in the container.
 */
 
 
-/* helper function */
-
-
 /* Get the data object pointer from an item. */
 void* OC_get_data_ptr(const void* item_ptr) {
 	/* check if not null */
@@ -163,27 +160,144 @@ void* OC_get_data_ptr(const void* item_ptr) {
 /* Delete the specified item.
 Caller is responsible for any deletion of the data pointed to by the item. */
 void OC_delete_item(struct Ordered_container* c_ptr, void* item_ptr) {
-	int size = c_ptr->size; 
-	void** container_ptr = c_ptr->array;
+	void** container_end = c_ptr->array + c_ptr->size;
 	void** data_ptr = (void**)item_ptr;
-
 	/* move all elements above deleted element down */
-	/*  0  1  2  3  4  5     6       7  8   */
-	/* [v][v][v][v][v][v][delete v][v1][v2] */
-	/* [v][v][v][v][v][v] [v1][v2][v2]      */
-	/* [v][v][v][v][v][v] [v1][v2][NULL]    */
-	/* contiguous memory so address will be in increasing order */
-	/* guaranteed to be stored in increasing order */
-	/* start from item given and shift everything else down afterwards*/
-	while (data_ptr <= (container_ptr + (size - 1))) {
-		if (data_ptr == (container_ptr + (size - 1))) {
-			data_ptr == NULL;
-			break;
-		}
-		*data_ptr = *(data_ptr + 1);
+	while (data_ptr < container_end) {
+		*data_ptr = *(data_ptr + 1); // last one should take NULL? 
 		++data_ptr; 
 	}
 	--(c_ptr->size);
 	--g_Container_items_in_use;
 }
 
+
+/*
+Functions that search and insert into the container using the supplied comparison function.
+*/
+
+/* helper function */
+/* binary search function that updates index to to find the item */
+int binary_finder(const struct Ordered_container* c_ptr, const void* data_ptr,
+	OC_comp_fp_t comp_func, int* index) {
+	
+	int result;
+	int low = 0; 
+	int high = c_ptr->size - 1;
+	int mid; 
+
+	while (low <= high) {
+		mid = (low + high) / 2;
+		/* c_ptr->array[mid] == (*c_ptr).array[mid] */
+		/* if pa poinnts to a particular element of an array, then pa + 1 points to next */
+		/* in evaulating a[i] C converts it to *(a =+i) */
+		/* if pa is a pointer, expressions may use it with a subscript, pa[i];
+		pa[i] is identical to *(pa + i) */
+		/* there is one difference between an array name and a poitner that must be kept in mind. 
+		a pointer is a variable, so pa=a and pa++ are legal. But an array name is not a variable;
+		construction like a=pa and a++ are illegal. */
+		/* c_ptr->array[mid] == *(c_ptr->array + mid)*/
+		if ((result = comp_func(data_ptr, c_ptr->array[mid])) < 0) {
+			high = mid - 1;
+		}
+		else if (result > 0) {
+			low = mid + 1;
+		}
+		else {
+			/* found item */
+			*index = mid;
+				return 1;
+		}
+	}
+
+	/* failed to find item */
+	*index = high + 1;
+	return 0;
+
+}
+
+/* Create a new item for the specified data pointer and put it in the container in order.
+If there is already an item in the container that compares equal to new item according to
+the comparison function, the insertion will not take place and 0 is returned to indicate failure.
+Otherwise, the insertion is done and non-zero is returned to show success.
+This function will not modify the pointed-to data. */
+int OC_insert(struct Ordered_container* c_ptr, const void* data_ptr) {
+
+}
+
+/* Return a pointer to an item that points to data equal to the data object pointed to by data_ptr,
+using the ordering function to do the comparison with data_ptr as the first argument.
+The data_ptr object is assumed to be of the same type as the data objects pointed to by container items.
+NULL is returned if no matching item is found.
+The pointed-to data will not be modified. */
+void* OC_find_item(const struct Ordered_container* c_ptr, const void* data_ptr) {
+	int index; 
+	int found = binary_finder(c_ptr, data_ptr, c_ptr->comp_fun, &index);
+
+	/* c_ptr->array is index 0 */
+	/* return a pointer to the void* which is the item of the array of pointers */
+	return (found) ? c_ptr->array + index : NULL; 
+
+}
+
+/* Return a pointer to the item that points to data that matches the supplied argument given by arg_ptr
+according to the supplied function, which compares arg_ptr as the first argument with the data pointer
+in each item. This function does not require that arg_ptr be of the same type as the data objects, and
+so allows the container to be searched without creating a complete data object first.
+NULL is returned if no matching item is found. If more than one matching item is present, it is
+unspecified which one is returned. The comparison function must implement an ordering consistent
+with the ordering produced by the comparison function specified when the container was created;
+if not, the result is undefined. */
+void* OC_find_item_arg(const struct Ordered_container* c_ptr, const void* arg_ptr, OC_find_item_arg_fp_t fafp) {
+	int index; 
+	int found = binary_finder(c_ptr, arg_ptr, fafp, &index);
+	/* c_ptr->array is index 0 */
+	/* return a pointer to the void* which is the item of the array of pointers */
+	return (found) ? c_ptr->array + index : NULL;
+
+}
+
+
+/*
+Functions that traverse the items in the container, processing each item in order.
+*/
+
+/* Apply the supplied function to the data pointer in each item of the container.
+The contents of the container cannot be modified. */
+void OC_apply(const struct Ordered_container* c_ptr, OC_apply_fp_t afp) {
+	/* void* is the node */
+	int i; 
+	for (i = 0; i < c_ptr->size; ++i)
+		afp(c_ptr->array[i]);
+}
+
+/* Apply the supplied function to the data pointer in each item in the container.
+If the function returns non-zero, the iteration is terminated, and that value
+returned. Otherwise, zero is returned. The contents of the container cannot be modified. */
+int OC_apply_if(const struct Ordered_container* c_ptr, OC_apply_if_fp_t afp) {
+	int i, result;
+	for (i = 0; i < c_ptr->size; ++i) {
+		if (result = afp(c_ptr->array[i]) != 0) { return result; };
+	}
+	return 0; 
+}
+
+/* Apply the supplied function to the data pointer in each item in the container;
+the function takes a second argument, which is the supplied void pointer.
+The contents of the container cannot be modified. */
+void OC_apply_arg(const struct Ordered_container* c_ptr, OC_apply_arg_fp_t afp, void* arg_ptr) {
+	int i;
+	for (i = 0; i < c_ptr->size; ++i)
+		afp(c_ptr->array[i], arg_ptr);
+}
+
+/* Apply the supplied function to the data pointer in each item in the container;
+the function takes a second argument, which is the supplied void pointer.
+If the function returns non-zero, the iteration is terminated, and that value
+returned. Otherwise, zero is returned. The contents of the container cannot be modified */
+int OC_apply_if_arg(const struct Ordered_container* c_ptr, OC_apply_if_arg_fp_t afp, void* arg_ptr) {
+	int i, result; 
+	for(i = 0; i < c_ptr->size; ++i)
+		if (result = afp(c_ptr->array[i], arg_ptr) != 0) { return result; }
+	return 0; 
+}

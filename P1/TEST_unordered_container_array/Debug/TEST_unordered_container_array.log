@@ -1,2 +1,6 @@
-﻿  t_main1.c
-  TEST_unordered_container_array.vcxproj -> C:\Users\Gabriel\Desktop\C_C++\381\P1\TEST_unordered_container_array\Debug\TEST_unordered_container_array.exe
+﻿  Ordered_container_array.c
+C:\Users\Gabriel\Desktop\C_C++\381\P1\TEST_unordered_container_array\Ordered_container_array.c(177,13): warning C4553: '==': result of expression not used; did you intend '='?
+C:\Users\Gabriel\Desktop\C_C++\381\P1\TEST_unordered_container_array\Ordered_container_array.c(202,61): error C2143: syntax error: missing ')' before '{'
+C:\Users\Gabriel\Desktop\C_C++\381\P1\TEST_unordered_container_array\Ordered_container_array.c(215,9): warning C4552: '+': result of expression not used
+  t_main1.c
+  Generating Code...
