@@ -75,6 +75,12 @@ struct Ordered_container {
 };
 
 
+/* helper functions */
+void initialize_array(struct Ordered_container* c_ptr);
+int binary_finder(const struct Ordered_container* c_ptr, const void* data_ptr,
+	OC_comp_fp_t comp_func, int* index);
+void grow_array(struct Ordered_container* c_ptr);
+
 /*
 Functions for the entire container.
 */
@@ -108,15 +114,6 @@ void OC_destroy_container(struct Ordered_container* c_ptr) {
 
 /* Delete all the items in the container and initialize it.
 Caller is responsible for deleting any pointed-to data first. */
-
-/* helper function */
-void initialize_array(struct Ordered_container* c_ptr) {
-	c_ptr->array = safe_malloc(INITIAL_ARRAY_SIZE * sizeof(void*));
-	c_ptr->allocation = INITIAL_ARRAY_SIZE;
-	c_ptr->size = 0; 
-
-	g_Container_items_allocated += INITIAL_ARRAY_SIZE; 
-}
 
 void OC_clear(struct Ordered_container* c_ptr) {
 	/* free array */
@@ -176,85 +173,12 @@ void OC_delete_item(struct Ordered_container* c_ptr, void* item_ptr) {
 Functions that search and insert into the container using the supplied comparison function.
 */
 
-/* helper function */
-/* binary search function that updates index to to find the item */
-int binary_finder(const struct Ordered_container* c_ptr, const void* data_ptr,
-	OC_comp_fp_t comp_func, int* index) {
-	
-	int result;
-	int low = 0; 
-	int high = c_ptr->size - 1;
-	int mid; 
-
-	while (low <= high) {
-		mid = (low + high) / 2;
-		/* c_ptr->array[mid] == (*c_ptr).array[mid] */
-		/* if pa poinnts to a particular element of an array, then pa + 1 points to next */
-		/* in evaulating a[i] C converts it to *(a =+i) */
-		/* if pa is a pointer, expressions may use it with a subscript, pa[i];
-		pa[i] is identical to *(pa + i) */
-		/* there is one difference between an array name and a poitner that must be kept in mind. 
-		a pointer is a variable, so pa=a and pa++ are legal. But an array name is not a variable;
-		construction like a=pa and a++ are illegal. */
-		/* c_ptr->array[mid] == *(c_ptr->array + mid)*/
-		if ((result = comp_func(data_ptr, c_ptr->array[mid])) < 0) {
-			high = mid - 1;
-		}
-		else if (result > 0) {
-			low = mid + 1;
-		}
-		else {
-			/* found item */
-			*index = mid;
-				return 1;
-		}
-	}
-
-	/* failed to find item */
-	*index = high + 1;
-	return 0;
-
-}
 
 /* Create a new item for the specified data pointer and put it in the container in order.
 If there is already an item in the container that compares equal to new item according to
 the comparison function, the insertion will not take place and 0 is returned to indicate failure.
 Otherwise, the insertion is done and non-zero is returned to show success.
 This function will not modify the pointed-to data. */
-/* When a new item is to
-be inserted and the array is full, a new array is allocated whose size is double the space required to
-hold the original array plus the new value(new size = 2 * (old size + 1)).This scheme can waste some
-memory space, but results in fairly fast performance because as the container is filled, fewer new
-allocation / copy / deallocate operations are required.But the array normally will have cells that are not
-currently in use; so this implementation has to keep track of how many cells are in use to hold items,
-which is returned by the OC_get_size function, and how many cells are currently allocated — the size of
-the current allocated array.To remove an item, the items that come after the removed one are moved
-"up" by one, but the array is not reallocated — it retains its original size.The only time the array
-is "shrunk" is with the OC_clear function, which discards the entire arrayand starts over with the
-initial small allocation.*/
-
-
-void grow_array(struct Ordered_container* c_ptr) {
-	int bigger_allocation; 
-	void** bigger_array;
-	int i;
-
-	/* have to create new array*/
-	bigger_allocation = GROW_ARRAY_FACTOR + (c_ptr->size + 1);
-	bigger_array = safe_malloc(bigger_allocation * sizeof(void*));
-	/* copy old array into new array */
-	for (i = 0; i < c_ptr->size; ++i) {
-		bigger_array[i] = c_ptr->array[i];
-	}
-	/* free old array */
-	free(c_ptr->array);
-	/* set new array */
-	c_ptr->array = bigger_array;
-	c_ptr->allocation = bigger_allocation;
-	/* update globals */
-	g_Container_items_allocated += (bigger_allocation - c_ptr->size);
-}
-
 int OC_insert(struct Ordered_container* c_ptr, const void* data_ptr) {
 	/* if equal to new item the insertion will not take place */
 	/* advantage of array is that it is contiguous memory */
@@ -355,4 +279,85 @@ int OC_apply_if_arg(const struct Ordered_container* c_ptr, OC_apply_if_arg_fp_t 
 	for(i = 0; i < c_ptr->size; ++i)
 		if (result = afp(c_ptr->array[i], arg_ptr) != 0) { return result; }
 	return 0; 
+}
+
+
+/* helper function */
+/* initialize array with INITIAL_ARRAY_SIZE */
+void initialize_array(struct Ordered_container* c_ptr) {
+	c_ptr->array = safe_malloc(INITIAL_ARRAY_SIZE * sizeof(void*));
+	c_ptr->allocation = INITIAL_ARRAY_SIZE;
+	c_ptr->size = 0;
+
+	g_Container_items_allocated += INITIAL_ARRAY_SIZE;
+}
+
+/* binary search function that updates index to to find the item */
+int binary_finder(const struct Ordered_container* c_ptr, const void* data_ptr,
+	OC_comp_fp_t comp_func, int* index) {
+
+	int result;
+	int low = 0;
+	int high = c_ptr->size - 1;
+	int mid;
+
+	while (low <= high) {
+		mid = (low + high) / 2;
+		/* c_ptr->array[mid] == (*c_ptr).array[mid] */
+		/* if pa poinnts to a particular element of an array, then pa + 1 points to next */
+		/* in evaulating a[i] C converts it to *(a =+i) */
+		/* if pa is a pointer, expressions may use it with a subscript, pa[i];
+		pa[i] is identical to *(pa + i) */
+		/* there is one difference between an array name and a poitner that must be kept in mind.
+		a pointer is a variable, so pa=a and pa++ are legal. But an array name is not a variable;
+		construction like a=pa and a++ are illegal. */
+		/* c_ptr->array[mid] == *(c_ptr->array + mid)*/
+		if ((result = comp_func(data_ptr, c_ptr->array[mid])) < 0) {
+			high = mid - 1;
+		}
+		else if (result > 0) {
+			low = mid + 1;
+		}
+		else {
+			/* found item */
+			*index = mid;
+			return 1;
+		}
+	}
+	/* failed to find item, high + 1 is index where it should be inserted */
+	*index = high + 1;
+	return 0;
+
+}
+
+/* When a new item is to
+be inserted and the array is full, a new array is allocated whose size is double the space required to
+hold the original array plus the new value(new size = 2 * (old size + 1)).This scheme can waste some
+memory space, but results in fairly fast performance because as the container is filled, fewer new
+allocation / copy / deallocate operations are required.But the array normally will have cells that are not
+currently in use; so this implementation has to keep track of how many cells are in use to hold items,
+which is returned by the OC_get_size function, and how many cells are currently allocated — the size of
+the current allocated array.To remove an item, the items that come after the removed one are moved
+"up" by one, but the array is not reallocated — it retains its original size.The only time the array
+is "shrunk" is with the OC_clear function, which discards the entire arrayand starts over with the
+initial small allocation.*/
+void grow_array(struct Ordered_container* c_ptr) {
+	int bigger_allocation;
+	void** bigger_array;
+	int i;
+
+	/* have to create new array*/
+	bigger_allocation = GROW_ARRAY_FACTOR + (c_ptr->size + 1);
+	bigger_array = safe_malloc(bigger_allocation * sizeof(void*));
+	/* copy old array into new array */
+	for (i = 0; i < c_ptr->size; ++i) {
+		bigger_array[i] = c_ptr->array[i];
+	}
+	/* free old array */
+	free(c_ptr->array);
+	/* set new array */
+	c_ptr->array = bigger_array;
+	c_ptr->allocation = bigger_allocation;
+	/* update globals */
+	g_Container_items_allocated += (bigger_allocation - c_ptr->size);
 }

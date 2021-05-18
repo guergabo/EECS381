@@ -67,6 +67,10 @@ struct Ordered_container {
 };
 
 
+/* helper function */
+int find_position(struct Ordered_container* c_ptr, struct LL_Node** current_node, struct LL_Node* item);
+
+
 /*
 Functions for the entire container.
 */
@@ -197,19 +201,6 @@ If there is already an item in the container that compares equal to new item acc
 the comparison function, the insertion will not take place and 0 is returned to indicate failure.
 Otherwise, the insertion is done and non-zero is returned to show success.
 This function will not modify the pointed-to data. */
-
-
-/* helper functions */
-int find_position(struct Ordered_container* c_ptr, struct LL_Node** current_node, struct LL_Node* item) {
-	/* find position and return results to determien proper insertion method */
-	int results; 
-	while ((results = c_ptr->comp_func(item->data_ptr, (*current_node)->data_ptr)) > 0) {
-		if ((*current_node)->next == NULL)
-			break;
-		*current_node = (*current_node)->next;
-	}
-	return results; 
-}
 
 void insert_before(struct Ordered_container* c_ptr, struct LL_Node* current_node, struct LL_Node* item) {
 	item->prev = current_node->prev; /* guaranteed move */
@@ -352,4 +343,16 @@ int OC_apply_if_arg(const struct Ordered_container* c_ptr, OC_apply_if_arg_fp_t 
 		node = node->next; 
 	}
 	return 0; 
+}
+
+/* helper functions */
+int find_position(struct Ordered_container* c_ptr, struct LL_Node** current_node, struct LL_Node* item) {
+	/* find position and return results to determien proper insertion method */
+	int results;
+	while ((results = c_ptr->comp_func(item->data_ptr, (*current_node)->data_ptr)) > 0) {
+		if ((*current_node)->next == NULL)
+			break;
+		*current_node = (*current_node)->next;
+	}
+	return results;
 }

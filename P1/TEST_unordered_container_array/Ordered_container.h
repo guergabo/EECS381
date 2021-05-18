@@ -180,7 +180,7 @@ typedef void (*OC_apply_fp_t) (void* data_ptr);
 
 /* Apply the supplied function to the data pointer in each item of the container.
 The contents of the container cannot be modified. */
-void OC_apply(const struct Ordered_container* c_ptr, OC_apply_fp_t afp);
+void OC_apply(const struct Ordered_container* c_ptr, OC_apply_fp_t  afp);
 
 /* Type of a function used by OC_apply_if.
 An apply_if function takes a data pointer as an argument, and returns zero or non-zero.

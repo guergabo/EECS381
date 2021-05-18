@@ -5,9 +5,9 @@
 
 
 /* libraries */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <stdio.h>  /* I/O */
+#include <stdlib.h> /* memory allocation and type conversion */
+#include <string.h> /* functions to deal with strings */
 
 
 /* Reminder Definitions */
@@ -36,6 +36,8 @@
 	f(int arr[]) == f(int* arr) 
 
 */
+
+/* note :: .c => [compiler] => assembly => [assembler] => object file (binary) => [Linker] => .exe63
 
 /*
 This contains a demo of the Ordered_container module; the behavior is the same regardless of whether
