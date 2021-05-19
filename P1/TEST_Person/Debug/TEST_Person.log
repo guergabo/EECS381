@@ -1,4 +1,2 @@
 ﻿  t_main.c
-C:\Users\Gabriel\Desktop\C_C++\381\P1\TEST_Person\t_main.c(137,31): warning C4133: 'function': incompatible types - from 'Ordered_container *' to 'Orderd_container *'
-C:\Users\Gabriel\Desktop\C_C++\381\P1\TEST_Person\t_main.c(180,23): warning C4133: 'function': incompatible types - from 'Orderd_container *' to 'Ordered_container *'
   TEST_Person.vcxproj -> C:\Users\Gabriel\Desktop\C_C++\381\P1\TEST_Person\Debug\TEST_Person.exe
