@@ -1,10 +1,12 @@
-/* test file for Person struct and commands */
+/* test file for project 1 */
 
-/* allows me to use normal scanf */
+/* allows me to use normal scanf, strcpy not scanf_s, etc. */
 #pragma warning(disable : 4996)
 
+/* interfaces */
 #include "Utility.h"
 #include "Ordered_container.h"
+#include "Meeting.h"
 #include "Person.h"
 
 /* libraries */
@@ -15,102 +17,22 @@
 #define NAME_BUFFER_SIZE 36 
 #define PHONE_BUFFER_SIZE 11
 
-/* Reminder Definitions */
-/* incomplete declarations :: */
-
-/* Buffer :: C uses a buffer to output or input variables. The buffer stores the variable that is 
-supposed to be taken in (input) or sent out (output) of the program. A buffer needs to be cleared
-before the next input is taken in. A buffer is a temporary storage used to store input and output 
-commands. All inputs and output commands are buffered in the OS's buffer. Typically
-because buffer contains data that is stored for a short amount of time, it is in the computer's 
-memory (RAM) */
-
-/* 	Switch statement :: allows a variable to be tested for equality against a list of value. Each 
-value is called a case, and the variable being switched on is checked for each switch case*/
-/* 
-	Stream I/O in C
-	---------------
-	A stream is a sequence of characters with functions to take characters oout of one 
-	end, and put characters into the other end. 
-
-	Specifically, one end of the stream is connected to a physical I/O device such as a 
-	keyboard or display. If it is a console output stream, your program puts characters 
-	into one end of the stream, and the display system takes characters out of the other 
-	and puts them on the screen. 
-
-	File streams follow the same principle, except that the file system is attached to 
-	the other end of the stream. 
-
-	The standard I/O streams: stdin and stdout 
-	Two streams that allow you to communicate with your console.
-
-	stdin --> keyboard
-	stdout --> display 
-
-	stdin and stdout are actually global variables that are declared in <stdio.h> and 
-	initialized during program startup. 
-
-	Stream Output :: printf()
-	The value of the variable is converted into a sequence of characters on depending on 
-	the format. 
-
-	// the char* is the format string, and the ... is a special type declaration that 
-	// tells the compiler that any number of argumnets of any type can appear before 
-	// the right parentheses;
-	int printf(const char*, ...);
-	
-	because pritnf() has to go by the format specification and not the actual types 
-	of the variables, it is not type-safe. That is, there is no check that the variables 
-	you supply match the format items in type. 
-
-	Stream Input :: scanf()
-	Like printf, scanf lacks type safety 
-
-	int scanf(const char*, ...); 
-
-	Each % item is a request to look for a value for a certain type in the input stream. 
-	In almost all cases, the scanf functions starts the scan for the value by skipping over 
-	any initial whitespace characters. 
-
-	can collect digit, +, -
-	space cannot be part of an integer so it stops 
-
-	%c - whitespaces are characters and won't be skipped 
-
-	if invalid :: 
-	1. print a message
-	2. skip over the bad input by reading and discarding it 
-	3. start fresh 
-
-	input reading loop structure :: 
-
-	Attempt to read some input. 
-	Check for successful read.
-		If success, and only if success, 
-			use the input (which may involve addition checks on validity) 
-		If fail, do the following:
-			Print a message informing the user of the bad input 
-			Skip the offending material.
-			Resume Processing. 
-
-	while(getchar() != '\n'); // gets character from the stream`
-
-	File Streams in C :: 
-	
-
-*/
-
 /* function prototypes */
 /* add functions */
 void add_individual(struct Ordered_container* person_list);
+/* add_meeting */
 
 /* print functions */
 void print_individual(const struct Ordered_container* person_list);
 void print_all_individuals(const struct Ordered_container* person_list);
+/* print_meeting */
+/* print_all_meetings */
 
 /* delete functions */
 void delete_individual(struct Ordered_container* person_list); 
 void delete_all_individuals(struct Ordered_container* person_list);
+/* delete_meeting */
+/* delete_all_meetings */
 void delete_all(struct Ordered_container* person_list);
 
 /* reschedule functions */
@@ -140,6 +62,27 @@ void person_exists_error(void);
 void no_person_error(void);
 
 int main(){
+
+	int time = 9; 
+	char topic[6] = "Music";
+	struct Meeting* meeting_ptr = create_Meeting(time, topic);
+
+	int TIME = get_Meeting_time(meeting_ptr);
+	printf("The meeting time is %d\n", TIME);
+
+	set_Meeting_time(meeting_ptr, 12);
+	int NEW_TIME = get_Meeting_time(meeting_ptr);
+	printf("The new meeting time is %d\n", NEW_TIME);
+
+
+
+
+
+
+
+	return 0; 
+
+
 
 	struct Ordered_container* person_list; 
 	person_list = OC_create_container(comp_func_person);

@@ -224,7 +224,7 @@ void insert_after(struct Ordered_container* c_ptr, struct LL_Node* current_node,
 int OC_insert(struct Ordered_container* c_ptr, const void* data_ptr) {
 	/* create new item for specified data_ptr */
 	struct LL_Node* item = safe_malloc(sizeof(struct LL_Node));
-	item->data_ptr = data_ptr;
+	item->data_ptr = (void*)data_ptr;
 	item->next = NULL;
 	item->prev = NULL;
 	/* search and find correct index, interrupts if found equal or greater */

@@ -140,12 +140,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Meeting.c" />
     <ClCompile Include="Ordered_container_list.c" />
     <ClCompile Include="Person.c" />
     <ClCompile Include="t_main.c" />
     <ClCompile Include="Utility.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Meeting.h" />
     <ClInclude Include="Ordered_container.h" />
     <ClInclude Include="Person.h" />
     <ClInclude Include="Utility.h" />

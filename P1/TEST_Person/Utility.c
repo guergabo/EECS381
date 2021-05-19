@@ -28,6 +28,12 @@ char* alloc_char(int bytes) {
 	return dynamic_memory; 
 }
 
+/* safe malloc for characters, make sure it is casted to char* */
+struct Ordered_container* alloc_container(int bytes) {
+	struct Ordered_container* dynamic_memory = (struct Ordered_container*)safe_malloc(bytes);
+	return dynamic_memory;
+}
+
 /* comparison function for Person using their lastnames */
 int comp_func_person(const void* person_ptr1, const void* person_ptr2) {
 	return strcmp(get_Person_lastname((struct Person*) person_ptr1), 

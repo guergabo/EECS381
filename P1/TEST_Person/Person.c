@@ -7,7 +7,10 @@ Remove this comment and complete this file with all necessary code.
 
 #include "Utility.h"
 #include "Person.h"
-#include "string.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 /* a Person consist of pointers to C-strings for names and phone number */
 struct Person {
