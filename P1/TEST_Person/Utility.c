@@ -28,8 +28,14 @@ char* alloc_char(int bytes) {
 	return dynamic_memory; 
 }
 
-/* comparison function for Person */
+/* comparison function for Person using their lastnames */
 int comp_func_person(const void* person_ptr1, const void* person_ptr2) {
 	return strcmp(get_Person_lastname((struct Person*) person_ptr1), 
 				  get_Person_lastname((struct Person*) person_ptr2));
+}
+
+/* comparison function to find Person with last name */
+int comp_func_person_arg(const void* lastname, const void* person_ptr2) {
+	return strcmp((char*) lastname,
+		get_Person_lastname((struct Person*)person_ptr2));
 }
