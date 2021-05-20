@@ -231,8 +231,7 @@ int OC_insert(struct Ordered_container* c_ptr, const void* data_ptr) {
 	if (OC_empty(c_ptr)) { /* if container is empty */
 		c_ptr->first = item;
 		c_ptr->last = item;
-	}
-	else {
+	} else {
 		struct LL_Node* current_node = c_ptr->first;
 		/* only breaks if 0 (equal) or -1 (less) than returns */
 		int results = find_position(c_ptr, &current_node, item);

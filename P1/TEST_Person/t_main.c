@@ -6,8 +6,8 @@
 /* interfaces */
 #include "Utility.h"
 #include "Ordered_container.h"
-#include "Meeting.h"
 #include "Person.h"
+#include "Meeting.h"
 
 /* libraries */
 #include <stdio.h>
@@ -63,19 +63,48 @@ void no_person_error(void);
 
 int main(){
 
-	int time = 9; 
-	char topic[6] = "Music";
-	struct Meeting* meeting_ptr = create_Meeting(time, topic);
+	int initial_time = 9; 
+	char initial_topic[6] = "Music";
+	struct Meeting* meeting_ptr = create_Meeting(initial_time, initial_topic);
+	
+	int current_time = get_Meeting_time(meeting_ptr);
+	printf("The meeting is at %d\n", current_time);
+	set_Meeting_time(meeting_ptr, 5);
+	int new_time = get_Meeting_time(meeting_ptr);
+	printf("The meeting is now at %d\n", new_time);
 
-	int TIME = get_Meeting_time(meeting_ptr);
-	printf("The meeting time is %d\n", TIME);
-
-	set_Meeting_time(meeting_ptr, 12);
-	int NEW_TIME = get_Meeting_time(meeting_ptr);
-	printf("The new meeting time is %d\n", NEW_TIME);
+	struct Meeting* new_meeting_ptr = create_Meeting(initial_time, initial_topic);
+	printf("There are currently %d meetings today\n", g_Meeting_memory);
+	destroy_Meeting(new_meeting_ptr);
+	printf("There are now %d meetings today\n", g_Meeting_memory);
 
 
+	/* add participant to a meeting_ptr */
+	struct Person* person_ptr1 = create_Person("Vikitha", "Reddy", "954");
+	struct Person* person_ptr = create_Person("Gabriel", "Guerra", "954");
+	struct Person* person_ptr2 = create_Person("Abby", "Harriet", "954");
 
+	add_Meeting_participant(meeting_ptr, person_ptr);
+	add_Meeting_participant(meeting_ptr, person_ptr1);
+	add_Meeting_participant(meeting_ptr, person_ptr2);
+
+
+	print_Meeting(meeting_ptr);
+
+	struct Person* crasher = create_Person("Not", "Invited", "4eva");
+	remove_Meeting_participant(meeting_ptr, person_ptr);
+	remove_Meeting_participant(meeting_ptr, crasher);
+	print_Meeting(meeting_ptr);
+	
+
+
+
+
+
+
+
+
+	
 
 
 
