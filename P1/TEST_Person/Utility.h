@@ -6,9 +6,6 @@
 /* incomplete declarations */
 struct Ordered_container;
 
-/* compare function for Rooms */
-int compare_string(const void* data_ptr1, const void* data_ptr2);
-
 /* safe malloc function */
 void* safe_malloc(int bytes);
 
@@ -29,5 +26,11 @@ int comp_func_room(const void* room_ptr1, const void* room_ptr2);
 
 /* comparison function to find Room with number */
 int comp_func_room_arg(const void* room_ptr1, const void* room_ptr2);
+
+/* comparison function to organize Meetings */
+int comp_func_meeting(const void* meeting_ptr1, const void* meeting_ptr2);
+
+/* comparison function to find Meeting with a certain time */
+int comp_func_meeting_arg(const void* time, const void* meeting_ptr2);
 
 #endif

@@ -57,7 +57,7 @@ void destroy_Meeting(struct Meeting* meeting_ptr) {
 
 /* Return and set the meeting time. The time value is assumed to be in 12-hr form.*/
 int get_Meeting_time(const struct Meeting* meeting_ptr) {
-	return meeting_ptr->time;
+	return meeting_ptr->time;	
 }
 
 void set_Meeting_time(struct Meeting* meeting_ptr, int time) {

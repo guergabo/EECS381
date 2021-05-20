@@ -351,7 +351,7 @@ int find_position(struct Ordered_container* c_ptr, struct LL_Node** current_node
 	/* find position and return results to determine proper insertion method */
 	int results;
 	while ((results = c_ptr->comp_func(item->data_ptr, (*current_node)->data_ptr)) > 0) {
-		if ((*current_node)->next == NULL)
+		if ((*current_node)->next == NULL) /* if reached the end, break; */
 			break;
 		*current_node = (*current_node)->next;
 	}

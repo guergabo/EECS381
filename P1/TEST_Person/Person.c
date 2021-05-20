@@ -70,5 +70,5 @@ void save_Person(const struct Person* person_ptr, FILE* outfile) {
 return a pointer to it, NULL if invalid data discovered in file.
 No check made for whether the Person already exists or not. */
 struct Person* load_Person(FILE* infile) {
-
+	return NULL; 
 }

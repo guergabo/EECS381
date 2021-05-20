@@ -33,27 +33,47 @@ This is the only function that frees the memory for a Room
 and the contained data. The Meetings are destroyed before the
 Meeting list is emptied. */
 void destroy_Room(struct Room* room_ptr) {
-
+	OC_destroy_container(room_ptr->meetings);
+	free(room_ptr);
 }
 
 /* Return the room number. */
-int  (const struct Room* room_ptr) {
+int  get_Room_number(const struct Room* room_ptr) {
 	return room_ptr->number; 
 }
 
 /* Add the meeting to the room, return non-zero if a meeting already at that time, 0 if OK. */
 int add_Room_Meeting(struct Room* room_ptr, const struct Meeting* meeting_ptr) {
-
+	void* item_ptr;
+	/* check if there is a meeting already at that time */
+	int meeting_time = get_Meeting_time(meeting_ptr);
+	item_ptr = OC_find_item_arg(room_ptr->meetings, &meeting_time, comp_func_meeting_arg);
+	if (item_ptr) { return 0; }
+	/* add meeting to the room */
+	OC_insert(room_ptr->meetings, meeting_ptr);
+	return 1; 
 }
 
 /* Return a pointer to the meeting at the specified time, NULL if not present. */
 struct Meeting* find_Room_Meeting(const struct Room* room_ptr, int time) {
-
+	const void* item_ptr; 
+	item_ptr = OC_find_item_arg(room_ptr->meetings, &time, comp_func_meeting_arg);
+	if (item_ptr) { return (struct Meeting*)(OC_get_data_ptr(item_ptr)); }
+	return NULL; 
 }
 
 /* Remove the supplied meeting from the room; return non-zero if not there; 0 if OK.
 The meeting is not destroyed because we may need to place it into another room. */
 int remove_Room_Meeting(struct Room* room_ptr, const struct Meeting* meeting_ptr) {
+
+
+	/* DOUBLE CHECK MEANING */
+	const void* item_ptr; 
+	item_ptr = OC_find_item(room_ptr->meetings, meeting_ptr);
+	if (item_ptr) { OC_delete_item(room_ptr->meetings, item_ptr); return  0; }
+	/* not there */
+	return 1; 
+	/* DOUBLE CHECK MEANING */
 
 }
 

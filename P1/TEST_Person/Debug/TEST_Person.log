@@ -1,2 +1,14 @@
-﻿  t_main.c
+﻿  Meeting.c
+  Ordered_container_list.c
+  Person.c
+  Room.c
+  Utility.c
+C:\Users\Gabriel\Desktop\C_C++\381\P1\TEST_Person\Utility.c(63,34): warning C4047: '<': 'int *' differs in levels of indirection from 'int'
+C:\Users\Gabriel\Desktop\C_C++\381\P1\TEST_Person\Utility.c(64,34): warning C4047: '<': 'int *' differs in levels of indirection from 'int'
+  t_main.c
+  Generating Code...
+C:\Users\Gabriel\Desktop\C_C++\381\P1\TEST_Person\Room.c(47): warning C4716: 'add_Room_Meeting': must return a value
+C:\Users\Gabriel\Desktop\C_C++\381\P1\TEST_Person\Room.c(52): warning C4716: 'find_Room_Meeting': must return a value
+C:\Users\Gabriel\Desktop\C_C++\381\P1\TEST_Person\Room.c(58): warning C4716: 'remove_Room_Meeting': must return a value
+C:\Users\Gabriel\Desktop\C_C++\381\P1\TEST_Person\Room.c(69): warning C4716: 'get_Room_Meetings': must return a value
   TEST_Person.vcxproj -> C:\Users\Gabriel\Desktop\C_C++\381\P1\TEST_Person\Debug\TEST_Person.exe

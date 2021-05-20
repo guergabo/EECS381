@@ -1,16 +1,13 @@
 #include "Utility.h"
 #include "Person.h"
+#include "Meeting.h"
 #include "Room.h"
+
 
 #include <stdio.h>
 #include <stdlib.h> /* standard library, includes malloc/free */
 #include <string.h> /* contains compare strings function strcmp */
 
-/* compares strings, returns 0 if equal, less than 0 if the
-first is less than second, and greater than 0 if first is greater second */
-int compare_string(const void* data_ptr1, const void* data_ptr2) {
-	return strcmp((char*)data_ptr1, (char*)data_ptr2);
-}
 
 /* safe malloc function */
 void* safe_malloc(int bytes) {
@@ -61,5 +58,25 @@ int comp_func_room_arg(const void* room_number_ptr, const void* room_ptr) {
 	return *((int*)room_number_ptr) - get_Room_number((struct Room*)room_ptr);
 }
 
+/* normalizing the time for meeting */
+void normalize_time(int* time_1, int* time_2) {
+	if (*time_1 < 6) { (*time_1) += 12; }
+	if (*time_2 < 6) { (*time_2) += 12; }
+}
 
+/* comparison function to organize Meetings */
+int comp_func_meeting(const void* meeting_ptr1, const void* meeting_ptr2) {
+	int time_1 = get_Meeting_time((const struct Meeting*)meeting_ptr1);
+	int time_2 = get_Meeting_time((const struct Meeting*)meeting_ptr2);
+	/* normalize time to military time */
+	normalize_time(&time_1, &time_2);
+	return (time_1 - time_2);
+}
 
+/* comparison function to find Meeting with a certain time */
+int comp_func_meeting_arg(const void* time, const void* meeting_ptr2) {
+	int time_1 = *(int*)time;
+	int time_2 = get_Meeting_time((const struct Meeting*)meeting_ptr2);
+	normalize_time(&time_1, &time_2);
+	return (time_1 - time_2);
+}
