@@ -1,5 +1,6 @@
 #include "Utility.h"
 #include "Person.h"
+#include "Room.h"
 
 #include <stdio.h>
 #include <stdlib.h> /* standard library, includes malloc/free */
@@ -45,3 +46,20 @@ int comp_func_person_arg(const void* lastname, const void* person_ptr2) {
 	return strcmp((char*) lastname,
 		get_Person_lastname((struct Person*)person_ptr2));
 }
+
+/* comparison function for Room */
+int comp_func_room(const void* room_ptr1, const void* room_ptr2) {
+	/* incomplete declaration so have to call function */
+	/* if equal will  return 0, if first is greater will return positive,
+	if first is less will return negative */
+	return get_Room_number((struct Room*)room_ptr1) -
+		   get_Room_number((struct Room*)room_ptr2);
+}
+
+/* comparison function to find Room with number */
+int comp_func_room_arg(const void* room_number_ptr, const void* room_ptr) {
+	return *((int*)room_number_ptr) - get_Room_number((struct Room*)room_ptr);
+}
+
+
+

@@ -24,4 +24,10 @@ int comp_func_person(const void* person_ptr1, const void* person_ptr2);
 /* comparison function to find Person with last name */
 int comp_func_person_arg(const void* lastname, const void* person_ptr2);
 
+/* comparison function for Room */
+int comp_func_room(const void* room_ptr1, const void* room_ptr2);
+
+/* comparison function to find Room with number */
+int comp_func_room_arg(const void* room_ptr1, const void* room_ptr2);
+
 #endif

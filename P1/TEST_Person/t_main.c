@@ -62,40 +62,7 @@ void person_exists_error(void);
 void no_person_error(void);
 
 int main(){
-
-	int initial_time = 9; 
-	char initial_topic[6] = "Music";
-	struct Meeting* meeting_ptr = create_Meeting(initial_time, initial_topic);
-	
-	int current_time = get_Meeting_time(meeting_ptr);
-	printf("The meeting is at %d\n", current_time);
-	set_Meeting_time(meeting_ptr, 5);
-	int new_time = get_Meeting_time(meeting_ptr);
-	printf("The meeting is now at %d\n", new_time);
-
-	struct Meeting* new_meeting_ptr = create_Meeting(initial_time, initial_topic);
-	printf("There are currently %d meetings today\n", g_Meeting_memory);
-	destroy_Meeting(new_meeting_ptr);
-	printf("There are now %d meetings today\n", g_Meeting_memory);
-
-
-	/* add participant to a meeting_ptr */
-	struct Person* person_ptr1 = create_Person("Vikitha", "Reddy", "954");
-	struct Person* person_ptr = create_Person("Gabriel", "Guerra", "954");
-	struct Person* person_ptr2 = create_Person("Abby", "Harriet", "954");
-
-	add_Meeting_participant(meeting_ptr, person_ptr);
-	add_Meeting_participant(meeting_ptr, person_ptr1);
-	add_Meeting_participant(meeting_ptr, person_ptr2);
-
-
-	print_Meeting(meeting_ptr);
-
-	struct Person* crasher = create_Person("Not", "Invited", "4eva");
-	remove_Meeting_participant(meeting_ptr, person_ptr);
-	remove_Meeting_participant(meeting_ptr, crasher);
-	print_Meeting(meeting_ptr);
-	
+	/* test the Room module */
 
 
 
@@ -104,21 +71,22 @@ int main(){
 
 
 
-	
 
 
 
 
-	return 0; 
+
+	return 0;
 
 
-
-	struct Ordered_container* person_list; 
-	person_list = OC_create_container(comp_func_person);
+	/* containers */
+	struct Ordered_container* person_list = OC_create_container(comp_func_person);
 
 	/* two character commands define program behavior */
 	char command_one;
 	char command_two;
+
+	/* main behavior loop */
 	while (1) {
 		/* read the two command characters */
 		printf("\nEnter command: ");

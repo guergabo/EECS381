@@ -30,6 +30,9 @@
     <ClCompile Include="Meeting.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Room.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Person.h">
@@ -42,6 +45,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Meeting.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Room.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
