@@ -67,9 +67,9 @@ void set_Meeting_time(struct Meeting* meeting_ptr, int time) {
 /* Add a participant; return non-zero and do nothing if already present. */
 int add_Meeting_participant(struct Meeting* meeting_ptr, const struct Person* person_ptr) {
 	/* check if person already a participant */
-	if ((is_Meeting_participant_present(meeting_ptr, person_ptr))) { return 0; }
-	int result = OC_insert(meeting_ptr->participants, person_ptr);
-	return result; 
+	if ((is_Meeting_participant_present(meeting_ptr, person_ptr))) { return 1; }
+	OC_insert(meeting_ptr->participants, (void*)person_ptr);
+	return 0; 
 }
 
 /* Return non-zero if the person is a participant, zero if not. */
@@ -81,11 +81,11 @@ int is_Meeting_participant_present(const struct Meeting* meeting_ptr, const stru
 /* Remove a participant; return non-zero if not present, zero if was present. */
 int remove_Meeting_participant(struct Meeting* meeting_ptr, const struct Person* person_ptr) {
 	/* check if person is even a participant */
-	if (!(is_Meeting_participant_present(meeting_ptr, person_ptr))) { return 0; }
+	if (!(is_Meeting_participant_present(meeting_ptr, person_ptr))) { return 1; }
 	/* find item that holds that person */
 	void* item_ptr = OC_find_item(meeting_ptr->participants, person_ptr);
 	OC_delete_item(meeting_ptr->participants, item_ptr);
-	return 1; 
+	return 0; 
 }
 
 /* Print the data in a struct Meeting. The time is expressed in 12-hr form with no AM/PM.*/
@@ -97,10 +97,9 @@ void print_Meeting(const struct Meeting* meeting_ptr) {
 	printf("Meeting time: %d, Topic: %s\n", meeting_ptr->time, meeting_ptr->topic);
 	/* participants */
 	printf("Participants:\n");
+	if (OC_get_size(meeting_ptr->participants) == 0) { printf("None\n"); return; }
 	/* print out the participants */
-	struct Ordered_container* container = meeting_ptr->participants; 
-	OC_apply(container, (OC_apply_fp_t)print_participants_helper);
-	printf("\n");
+	OC_apply(meeting_ptr->participants, (OC_apply_fp_t)print_participants_helper);
 }
 
 /* Write the data in a Meeting to a file. The time is expressed in 12-hr form with no AM/PM.*/

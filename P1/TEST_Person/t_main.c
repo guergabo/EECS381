@@ -8,6 +8,7 @@
 #include "Ordered_container.h"
 #include "Person.h"
 #include "Meeting.h"
+#include "Room.h"
 
 /* libraries */
 #include <stdio.h>
@@ -63,18 +64,57 @@ void no_person_error(void);
 
 int main(){
 	/* test the Room module */
+	struct Room* room_ptr = create_Room(1001);
+	printf("The room's number is %d\n", get_Room_number(room_ptr));
+
+	/* meeting stuff */
+	struct Meeting* meeting_ptr_1 = create_Meeting(9, "English");
+	struct Meeting* meeting_ptr_2 = create_Meeting(5, "Math");
+
+	add_Room_Meeting(room_ptr, meeting_ptr_1);
+	add_Room_Meeting(room_ptr, meeting_ptr_2);
+
+	struct Meeting* meeting_found = find_Room_Meeting(room_ptr, 9);
+	struct Meeting* meeting_found_other = find_Room_Meeting(room_ptr, 11);
+
+	if (meeting_found)
+		printf("The meeting's time is %d\n",get_Meeting_time(meeting_found));
+	else
+		printf("There is no meeting at that time.\n");
+
+	if (meeting_found_other)
+		printf("The meeting's time is %d\n", get_Meeting_time(meeting_found));
+	else
+		printf("There is no meeting at that time.\n");
 
 
+	int x = add_Room_Meeting(room_ptr, meeting_ptr_1);
+	if (x)
+		printf("Meeting already at that time\n");
 
+	print_Room(room_ptr);
 
+	struct Person* person_ptr_1 = create_Person("Gabriel", "Guerra", "954");
+	struct Person* person_ptr_2 = create_Person("Gabriel", "Reddy", "954");
+	struct Person* person_ptr_3 = create_Person("Gabriel", "Beth", "954");
+	struct Person* person_ptr_4 = create_Person("Gabriel", "Jacky", "954");
 
+	add_Meeting_participant(meeting_ptr_1, person_ptr_1);
+	add_Meeting_participant(meeting_ptr_1, person_ptr_2);
+	add_Meeting_participant(meeting_ptr_2, person_ptr_3);
+	add_Meeting_participant(meeting_ptr_2, person_ptr_4);
 
+	print_Room(room_ptr);
+	remove_Room_Meeting(room_ptr, meeting_ptr_1);
+	print_Room(room_ptr);
+	int y = remove_Room_Meeting(room_ptr, meeting_ptr_1);
+	if (y)
+		printf("Meeting is not there.\n");
 
-
-
-
-
-
+	clear_Room(room_ptr);
+	print_Room(room_ptr);
+	destroy_Room(room_ptr);
+	room_ptr = NULL;
 
 	return 0;
 
@@ -198,7 +238,7 @@ void print_all_individuals(const struct Ordered_container* person_list) {
 	/* check if size if zero */
 	if (OC_empty(person_list)) { printf("%s\n", "List of people is empty"); return; }    // HERE5
 	/* if not empty, loop and apply print_Person function to data_ptr */
-	OC_apply(person_list, (OC_apply_fp_t) print_all_helper);                                 // HERE6
+	OC_apply(person_list, (OC_apply_fp_t)print_all_helper);                                 // HERE6
 }
 
 

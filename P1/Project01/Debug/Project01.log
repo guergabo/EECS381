@@ -1,11 +1,2 @@
-﻿  Meeting.c
-  Ordered_container_array.c
-C:\Users\Gabriel\Desktop\C_C++\381\P1\Project01\Ordered_container_array.c(8,2): error C2061: syntax error: identifier 'OC_comp_fp_t'
-C:\Users\Gabriel\Desktop\C_C++\381\P1\Project01\Ordered_container_array.c(12,1): error C2059: syntax error: '}'
-  Ordered_container_list.c
-C:\Users\Gabriel\Desktop\C_C++\381\P1\Project01\Ordered_container_list.c(23,2): error C2061: syntax error: identifier 'OC_comp_fp_t'
-C:\Users\Gabriel\Desktop\C_C++\381\P1\Project01\Ordered_container_list.c(27,1): error C2059: syntax error: '}'
-  Person.c
-  Room.c
-  Utility.c
-  Generating Code...
+﻿  p1_main.c
+  Project01.vcxproj -> C:\Users\Gabriel\Desktop\C_C++\381\P1\Project01\Debug\Project01.exe

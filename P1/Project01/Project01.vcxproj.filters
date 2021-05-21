@@ -33,9 +33,6 @@
     <ClCompile Include="Ordered_container_list.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Ordered_container_array.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Room.h">

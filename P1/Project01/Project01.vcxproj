@@ -140,7 +140,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Meeting.c" />
-    <ClCompile Include="Ordered_container_array.c" />
     <ClCompile Include="Ordered_container_list.c" />
     <ClCompile Include="p1_main.c" />
     <ClCompile Include="Person.c" />
