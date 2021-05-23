@@ -1,2 +1,7 @@
 ﻿  p1_main.c
-  Project01.vcxproj -> C:\Users\Gabriel\Desktop\C_C++\381\P1\Project01\Debug\Project01.exe
+C:\Users\Gabriel\Desktop\C_C++\381\P1\Project01\p1_main.c(479,54): warning C4090: 'function': different 'const' qualifiers
+C:\Users\Gabriel\Desktop\C_C++\381\P1\Project01\p1_main.c(471,21): warning C4101: 'room_ptr': unreferenced local variable
+C:\Users\Gabriel\Desktop\C_C++\381\P1\Project01\p1_main.c(256): warning C4716: 'find_if_meeting_exist': must return a value
+C:\Users\Gabriel\Desktop\C_C++\381\P1\Project01\p1_main.c(265): error C4700: uninitialized local variable 'meeting_topic' used
+C:\Users\Gabriel\Desktop\C_C++\381\P1\Project01\p1_main.c(280): error C4700: uninitialized local variable 'time' used
+C:\Users\Gabriel\Desktop\C_C++\381\P1\Project01\p1_main.c(282): error C4700: uninitialized local variable 'topic' used
