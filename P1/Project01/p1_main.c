@@ -1,4 +1,4 @@
-/* C Program for Project 1, EECS 381 */
+/* C Program for Project 1, Micro Meeting Manager, EECS 381 */
 
 /* allows me to use normal scanf, strcpy not scanf_s, etc. */
 #pragma warning(disable : 4996)
@@ -24,7 +24,8 @@
 typedef enum {
 	BAD_COMMAND, READ_NO_INT, ROOM_OUT_OF_RANGE, ROOM_ALREADY_EXISTS,
 	PERSON_ALREADY_EXISTS, NO_PERSON, ROOM_DOESNT_EXIST, MEETING_ALREADY_EXIST,
-	TIME_OUT_OF_RANGE, MEETING_DOESNT_EXIST, ALREADY_PARTICIPANT
+	TIME_OUT_OF_RANGE, MEETING_DOESNT_EXIST, ALREADY_PARTICIPANT, NOT_PARTICIPANT,
+	SAME_MEETING
 } Error_c;
 
 /* function prototypes */
@@ -36,27 +37,31 @@ void add_person_to_meeting(struct Ordered_container* person_list, struct Ordered
 
 /* print functions */
 void print_individual(const struct Ordered_container* person_list);
-void print_all_individuals(const struct Ordered_container* person_list); // HERE1
 void print_room(const struct Ordered_container* room_list);
 void print_meeting(const struct Ordered_container* room_list);
 void print_all_meetings(const struct Ordered_container* room_list);
-/* print_memory (pa) */
+void print_all_individuals(const struct Ordered_container* person_list);
+void print_memory(const struct Ordered_container* person_list, const struct Ordered_container* room_list);
+
+/* reschedule functions */
+void reschedule_meeting(struct Ordered_container* room_list);
 
 /* delete functions */
 void delete_individual(struct Ordered_container* person_list);
-void delete_all_individuals(struct Ordered_container* person_list); // HERE2
 void delete_room(struct Ordered_container* room_list);
 void delete_meeting(struct Ordered_container* room_list);
-/* delete_all_meetings from all rooms (ds) */
-void delete_all(struct Ordered_container* person_list, struct Ordered_container* room_list); // HERE3   
-/* delete_participants (dp) */
-
-/* reschedule functions */
-/* reschedule_meeting (rm) */
+void delete_person_from_meeting(struct Ordered_container* person_list, struct Ordered_container* room_list); 
+void delete_all_rooms_and_meetings(struct Ordered_container* room_list);
+void delete_all_meetings(struct Ordered_container* room_list); 
+void delete_all_individuals(struct Ordered_container* person_list); 
+void delete_all(struct Ordered_container* person_list, struct Ordered_container* room_list); 
+void quit(struct Ordered_container* person_list, struct Ordered_container* room_list);
 
 /* save data functions */
+void save_data(const struct Ordered_container* person_list, const struct Ordered_container* room_list);
 
 /* load data functions */
+void load_data(const struct Ordered_container* person_list, const struct Ordered_container* room_list);
 
 /* person helper functions */
 void print_all_helper(void* data_ptr);
@@ -72,6 +77,7 @@ int read_room_number(int* room_number);
 int read_room(int* room_number);
 void* find_if_room_exists(const struct Ordered_container* room_list, const void* room_number);
 struct Room* read_and_find_room(const struct Ordered_container* room_list);
+void delete_all_rooms_helper(void* data_ptr);
 
 /* meeting helper functions */
 int validate_meeting_time(int* meeting_time);
@@ -80,9 +86,16 @@ int read_meeting_time_and_validate(int* meeting_time);
 int read_meeting_topic(char* meeting_topic);
 int read_meeting(int* meeting_time, char* meeting_topic);
 struct Meeting* read_and_find_meeting(const struct Ordered_container* room_list);
-struct Meeting* read_and_find_meeting_and_room(const struct Ordered_container* room_list,
-	const struct Room** room_ptr);
+struct Meeting* read_and_find_meeting_and_room(const struct Ordered_container* room_list, const struct Room** room_ptr);
 void print_all_meetings_helper(const void* data_ptr);
+void delete_all_meetings_helper(void* room_ptr);
+void reschedule_helper(struct Meeting* meeting_ptr_1, struct Room* room_ptr_1, struct Room* room_ptr_2, int new_meeting_time);
+
+/* save data helper functions */
+
+
+/* load data helper functions */
+
 
 /* error handling functions */
 void print_error_and_clear(Error_c error);
@@ -151,8 +164,23 @@ int main() {
 				/* (print) all meetings commands */
 				print_all_meetings(room_list);
 				break;
+			case 'a':
+				/* (print) memory allocations command */
+				print_memory(person_list, room_list);
+				break;
 			default:
 				print_error_and_clear(BAD_COMMAND);
+				break;
+			}
+			/* break from command_one */
+			break;
+		case 'r':
+			switch (command_two) {
+			case 'm':
+				/* (reschedule) meeting command */
+				reschedule_meeting(room_list);
+				break;
+			default:
 				break;
 			}
 			/* break from command_one */
@@ -179,15 +207,41 @@ int main() {
 				/* (delete) meeting command */
 				delete_meeting(room_list);
 				break;
+			case 'p':
+				/* (delete) participant from meeting command */
+				delete_person_from_meeting(person_list, room_list);
+				break;
+			case 's':
+				/* (delete) schedule command */
+				delete_all_meetings(room_list);
+				break;
 			default:
 				print_error_and_clear(BAD_COMMAND);
 				break;
 			}
 			/* break from command_one */
 			break;
-		case 'q':
-			delete_all(person_list, room_list); return 0;
+		case 's':
+			switch (command_two) {
+			case 'd':
+				/* (save) data command */
+				save_data(person_list, room_list);
+				break;
+			}
+			/* break from command_one */
 			break;
+		case 'l':
+			switch (command_two) {
+			case 'd':
+				/* (load) data command */
+				load_data(person_list, room_list);
+				break;
+			}
+			/* break from command_one */
+			break;
+		case 'q':
+			quit(person_list, room_list); 
+			return 0;
 		default:
 			print_error_and_clear(BAD_COMMAND);
 			break;
@@ -282,7 +336,42 @@ void add_person_to_meeting(struct Ordered_container* person_list, struct Ordered
 	print_error_and_clear(ALREADY_PARTICIPANT);
 }
 
-/* rm */
+/* rm <old room> <old time> <new room> <new time> — reschedule a meeting by changing its 
+room and/or time (without changing or reentering topic or participants). Each parameter 
+is read and its value checked before going on to the next parameter. Actually changing 
+the schedule is not done until all parameters have been read and checked. Errors: old room
+number out of range; old room does not exist; old time is out of range; no meeting at that 
+time in the old room; new room number out of range, new room does not exist; new time is 
+out of range; a meeting at the new time already exists in the new room. To keep the logic 
+simple, the last error will result if the user attempts to reschedule a meeting to be in 
+the same room and at the same time as it is currently. */
+void reschedule_meeting(struct Ordered_container* room_list) {
+	struct Room* room_ptr_1;
+	struct Room* room_ptr_2;
+	struct Meeting* meeting_ptr_1;
+	struct Meeting* meeting_ptr_2;
+	int new_meeting_time = INT_MIN;
+
+	/* check if old meeting with that time in that room exists and valid */
+	if (!(meeting_ptr_1 = read_and_find_meeting_and_room(room_list, &room_ptr_1))) { return; }
+	/* read and find new room */
+	if (!(room_ptr_2 = read_and_find_room(room_list))) { return; }
+	else if (!(read_meeting_time_and_validate(&new_meeting_time))) { return; }
+	/* check if new meeting with that time already exists, save new time */
+	else if (meeting_ptr_2 = find_Room_Meeting(room_ptr_2, new_meeting_time)) {
+		/* check if it is the same meeting first */
+		if (meeting_ptr_1 == meeting_ptr_2) {
+			/* different error */
+			print_error_and_clear(SAME_MEETING);
+			return; 
+		}
+		print_error_and_clear(MEETING_ALREADY_EXIST);
+		return; 
+	}
+	/* change room and/or time */
+	reschedule_helper(meeting_ptr_1, room_ptr_1, room_ptr_2, new_meeting_time);
+	printf("Meeting rescheduled to room %d at %d\n", get_Room_number(room_ptr_2), new_meeting_time);
+}
 
 /*
 print functions
@@ -320,7 +409,7 @@ void print_all_meetings(const struct Ordered_container* room_list) {
 	/* no rooms */
 	if (OC_empty(room_list)) { printf("List of rooms is empty\n"); return; }
 	/* rooms  */
-	printf("Information for %d rooms\n", OC_get_size(room_list));
+	printf("Information for %d rooms:\n", OC_get_size(room_list));
 	OC_apply(room_list, print_all_meetings_helper);
 }
 
@@ -328,12 +417,26 @@ void print_all_meetings(const struct Ordered_container* room_list) {
 Errors : none. (It is not an error if there are no people -- that is a valid possibility. */
 void print_all_individuals(const struct Ordered_container* person_list) {
 	/* check if size if zero */
-	if (OC_empty(person_list)) { printf("%s\n", "List of people is empty"); return; }    // HERE5
+	if (OC_empty(person_list)) { printf("%s\n", "List of people is empty"); return; }    
 	/* if not empty, loop and apply print_Person function to data_ptr */
-	OC_apply(person_list, (OC_apply_fp_t)print_all_helper);                                 // HERE6
+	printf("Information for %d people:\n", OC_get_size(person_list));
+	OC_apply(person_list, (OC_apply_fp_t)print_all_helper);                                 
 }
 
-/* pa */
+/* pa — print memory allocations (described below). Errors: none. In this project, the command 
+provides more detailed information about the amount of memory allocated than in Project 0. */
+void print_memory(const struct Ordered_container* person_list,
+			      const struct Ordered_container* room_list) {
+	printf("Memory allocations:\n");
+	/* Person = 3x, Meeting = 1x, Room = 0x */
+	printf("C-string: %d bytes total\n", g_string_memory);
+	printf("Person structs: %d\n", OC_get_size(person_list));
+	printf("Meeting structs: %d\n", g_Meeting_memory);
+	printf("Room structs: %d\n", OC_get_size(room_list));
+	printf("Containers: %d\n", g_Container_count);
+	printf("Container items in use: %d\n", g_Container_items_in_use);
+	printf("Container items allocated: %d\n", g_Container_items_allocated);
+}
 
 /*
 delete functions
@@ -385,16 +488,55 @@ void delete_meeting(struct Ordered_container* room_list) {
 	}
 }
 
-/* dp */
+/* dp <room> <time> <lastname> — delete a specified person from the participant list for a specified meeting. Errors: room
+number out of range; no room of that number; time out of range, no meeting at that time, no person of 
+that name in the people list; no person of that name in the participant list. */
+void delete_person_from_meeting(struct Ordered_container* person_list, struct Ordered_container* room_list) {
+	struct Room* room_ptr;
+	struct Meeting* meeting_ptr;
+	struct Person* person_ptr;
+	/* check if room exists and info is correct */
+	/* check if meeting with that time in that room exists and valid */
+	if (!(meeting_ptr = read_and_find_meeting_and_room(room_list, &room_ptr))) { return; }
+	/* check if person in the people list */
+	if (!(person_ptr = read_and_find_person(person_list))) { return; }
+	/* check if person is not already a participant */
+	if (is_Meeting_participant_present(meeting_ptr, person_ptr)) {
+		/* add person as a participant */
+		remove_Meeting_participant(meeting_ptr, person_ptr);
+		printf("Participant %s deleted\n", get_Person_lastname(person_ptr));
+		return;
+	}
+	/* not a participant */
+	print_error_and_clear(NOT_PARTICIPANT);
+}
 
-/* ds */
+/* used when deleting all command is called */
+void delete_all_rooms_and_meetings(struct Ordered_container* room_list) {
+	/* rooms */
+	OC_apply(room_list, delete_all_rooms_helper);
+	OC_clear(room_list); 
+	/* meetings*/
+	OC_apply(room_list, delete_all_meetings_helper);
+	printf("%s\n", "All rooms and meetings deleted");
+}
+
+/* ds — delete schedule — delete all meetings from all rooms. Errors: none. */
+void delete_all_meetings(struct Ordered_container* room_list) {
+	OC_apply(room_list, delete_all_meetings_helper);
+	printf("All meetings deleted\n");
+}
+
 
 /* dg : delete all of the individual information; but only if there are no meetings scheduled.
 Logically this is overkill; it would suffice it there are no participants in any meetings, but this
 specification is made for simplicity. Errors : There are scheduled meetings. */
 void delete_all_individuals(struct Ordered_container* person_list) {
 	/* check if there are no meetings */
-
+	if (g_Meeting_memory > 0) {
+		printf("Cannot clear people list unless there are no meetings!\n");
+		return;
+	}
 	/* deallocate the Person pointed to be the items */
 	OC_apply(person_list, (OC_apply_fp_t)delete_all_individuals_helper);
 	/* clear the container */
@@ -404,20 +546,37 @@ void delete_all_individuals(struct Ordered_container* person_list) {
 
 /* da : delete all of the rooms and their meetings (as in dr) and then delete all individuals in
 the people list. Errors : none. */
-void delete_all(struct Ordered_container* person_list,
-				struct Ordered_container* room_list) {
-
+void delete_all(struct Ordered_container* person_list, struct Ordered_container* room_list){
 	/* deallocate the Person pointed to be the items */
-	OC_apply(person_list, (OC_apply_fp_t)delete_all_individuals_helper);
+	delete_all_rooms_and_meetings(room_list);
+	delete_all_individuals(person_list);
+}
+
+/* qq — delete everything (as in da), and also delete the rooms and people lists, so that 
+all memory is deallocated, and then terminate. Errors: none.*/
+void quit(struct Ordered_container* person_list, struct Ordered_container* room_list) {
+	delete_all(person_list, room_list); 
 	/* clear the container */
-	OC_clear(person_list);
+	OC_destroy_container(person_list);
+	OC_destroy_container(room_list);
+	printf("Done\n");
+}
 
-	/* meetings */
 
-	/* rooms */
-	
+/* 
+save data functions (sd) 
+*/
+void save_data(const struct Ordered_container* person_list,
+	const struct Ordered_container* room_list) {
 
-	printf("%s\n%s\n", "All rooms and meetings deleted", "All persons deleted");
+}
+
+/* 
+load data functions (ld)
+*/
+void load_data(const struct Ordered_container* person_list,
+	const struct Ordered_container* room_list) {
+
 }
 
 
@@ -518,6 +677,11 @@ struct Room* read_and_find_room(const struct Ordered_container* room_list) {
 	return (item_ptr != NULL) ? (struct Room*)OC_get_data_ptr(item_ptr) : NULL;
 }
 
+/* used when deleting all command is called */
+void delete_all_rooms_helper(void* data_ptr) {
+	destroy_Room((struct Room*)data_ptr);
+}
+
 
 /* 
 meeting helper functions 
@@ -601,6 +765,20 @@ void print_all_meetings_helper(const void* data_ptr) {
 	print_Room((struct Room*)data_ptr);
 }
 
+/* clear the room and deleted meeting structs */
+void delete_all_meetings_helper(void* room_ptr) {
+	clear_Room((struct Room*)room_ptr);
+}
+
+/* reschedule helper function */
+void reschedule_helper(struct Meeting* meeting_ptr_1, struct Room* room_ptr_1,
+	struct Room* room_ptr_2, int new_meeting_time) {
+	remove_Room_Meeting(room_ptr_1, meeting_ptr_1);
+	set_Meeting_time(meeting_ptr_1, new_meeting_time);
+	add_Room_Meeting(room_ptr_2, meeting_ptr_1);
+
+}
+
 /* 
 error handling functions 
 */
@@ -638,6 +816,12 @@ void print_error_and_clear(Error_c error) {
 		break;
 	case ALREADY_PARTICIPANT:
 		printf("This person is already a participant!\n");
+		break;
+	case NOT_PARTICIPANT:
+		printf("This person is not a participant in the meeting!\n");
+		break;
+	case SAME_MEETING:
+		printf("Cannot reschedule to the same room and time!\n");
 		break;
 	default:
 		break;

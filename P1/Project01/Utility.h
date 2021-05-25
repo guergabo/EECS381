@@ -3,6 +3,10 @@
 
 #include <string.h>
 
+
+/* number of bytes used in C-strings */
+extern int g_string_memory;
+
 /* incomplete declarations */
 struct Ordered_container;
 
@@ -11,6 +15,9 @@ void* safe_malloc(int bytes);
 
 /* safe malloc for characters, make sure it is casted to char* */
 char* alloc_char(int bytes);
+
+/* safe malloc for characters, make sure it is casted to char */
+char* free_char(char* char_ptr);
 
 /* safe malloc for characters, make sure it is casted to char* */
 struct Ordered_container* alloc_container(int bytes);

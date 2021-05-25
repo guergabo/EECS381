@@ -47,7 +47,7 @@ but of course does not delete the Persons themselves. */
 void destroy_Meeting(struct Meeting* meeting_ptr) {
 	/* free items */
 	OC_destroy_container(meeting_ptr->participants);
-	free(meeting_ptr->topic);
+	free_char(meeting_ptr->topic);
 	/* free containers */
 	free(meeting_ptr);
 	--g_Meeting_memory;
@@ -94,9 +94,9 @@ void print_participants_helper(void* data_ptr) {
 void print_Meeting(const struct Meeting* meeting_ptr) {
 	printf("Meeting time: %d, Topic: %s\n", meeting_ptr->time, meeting_ptr->topic);
 	/* participants */
-	printf("Participants:\n");
-	if (OC_get_size(meeting_ptr->participants) == 0) { printf("None\n"); return; }
+	if (OC_get_size(meeting_ptr->participants) == 0) { printf("Participants: None\n"); return; }
 	/* print out the participants */
+	printf("Participants:\n");
 	OC_apply(meeting_ptr->participants, (OC_apply_fp_t)print_participants_helper);
 }
 

@@ -10,6 +10,8 @@
 #include <stdlib.h> /* standard library, includes malloc/free */
 #include <string.h> /* contains compare strings function strcmp */
 
+/* number of bytes used in C-strings */
+int g_string_memory = 0;
 
 /* safe malloc function */
 void* safe_malloc(int bytes) {
@@ -24,9 +26,18 @@ void* safe_malloc(int bytes) {
 /* safe malloc for characters, make sure it is casted to char* */
 char* alloc_char(int bytes) {
 	char* dynamic_memory = (char*)safe_malloc(bytes);
-	/* potential global for string memory */
+	/* global for string memory */
+	g_string_memory += bytes;
+
 	return dynamic_memory;
 }
+
+/* safe malloc for characters, make sure it is casted to char */
+char* free_char(char* char_ptr) {
+	g_string_memory -= (strlen(char_ptr) + 1);
+	free(char_ptr);
+}
+
 
 /* safe malloc for characters, make sure it is casted to char* */
 struct Ordered_container* alloc_container(int bytes) {

@@ -38,9 +38,9 @@ This is the only function that frees the memory for a Person
 and the contained data. */
 void destroy_Person(struct Person* person_ptr) {
 	/* free the contained data */
-	free(person_ptr->firstname);
-	free(person_ptr->lastname);
-	free(person_ptr->phoneno);
+	free_char(person_ptr->firstname);
+	free_char(person_ptr->lastname);
+	free_char(person_ptr->phoneno);
 
 	/* free the struct */
 	free(person_ptr);
