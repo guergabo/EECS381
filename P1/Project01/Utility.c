@@ -33,7 +33,7 @@ char* alloc_char(int bytes) {
 }
 
 /* safe malloc for characters, make sure it is casted to char */
-char* free_char(char* char_ptr) {
+void free_char(char* char_ptr) {
 	g_string_memory -= (strlen(char_ptr) + 1);
 	free(char_ptr);
 }

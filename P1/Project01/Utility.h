@@ -40,4 +40,5 @@ int comp_func_meeting(const void* meeting_ptr1, const void* meeting_ptr2);
 /* comparison function to find Meeting with a certain time */
 int comp_func_meeting_arg(const void* time, const void* meeting_ptr2);
 
+
 #endif

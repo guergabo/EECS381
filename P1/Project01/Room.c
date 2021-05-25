@@ -40,7 +40,7 @@ void destroy_Room(struct Room* room_ptr) {
 }
 
 /* Return the room number. */
-int  get_Room_number(const struct Room* room_ptr) {
+int get_Room_number(const struct Room* room_ptr) {
 	return room_ptr->number;
 }
 

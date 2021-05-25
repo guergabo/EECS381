@@ -1,2 +1,9 @@
-﻿  p1_main.c
+﻿  Meeting.c
+  Ordered_container_list.c
+  Person.c
+  Room.c
+  Utility.c
+  p1_main.c
+  Generating Code...
+C:\Users\Gabriel\Desktop\C_C++\381\P1\Project01\Utility.c(39): warning C4716: 'free_char': must return a value
   Project01.vcxproj -> C:\Users\Gabriel\Desktop\C_C++\381\P1\Project01\Debug\Project01.exe

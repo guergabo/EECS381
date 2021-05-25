@@ -237,7 +237,7 @@ int OC_insert(struct Ordered_container* c_ptr, const void* data_ptr) {
 		/* break with results 0 (matching item, do nothing) */
 		if (results == 0) { return 0; }
 		/* break with -1 (found larger one), fit before  */
-		if (results < 0) { insert_before(c_ptr, current_node, item); }
+		else if (results < 0) { insert_before(c_ptr, current_node, item); }
 		/* break with results 1 (no larger one, reached end), fit after tail */
 		else { insert_after(c_ptr, current_node, item); }
 	}

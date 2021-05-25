@@ -25,7 +25,7 @@ typedef enum {
 	BAD_COMMAND, READ_NO_INT, ROOM_OUT_OF_RANGE, ROOM_ALREADY_EXISTS,
 	PERSON_ALREADY_EXISTS, NO_PERSON, ROOM_DOESNT_EXIST, MEETING_ALREADY_EXIST,
 	TIME_OUT_OF_RANGE, MEETING_DOESNT_EXIST, ALREADY_PARTICIPANT, NOT_PARTICIPANT,
-	SAME_MEETING
+	SAME_MEETING, IS_PARTICIPANT, MEETINGS_EXIST
 } Error_c;
 
 /* function prototypes */
@@ -47,7 +47,7 @@ void print_memory(const struct Ordered_container* person_list, const struct Orde
 void reschedule_meeting(struct Ordered_container* room_list);
 
 /* delete functions */
-void delete_individual(struct Ordered_container* person_list);
+void delete_individual(struct Ordered_container* person_list, struct Ordered_container* room_list);
 void delete_room(struct Ordered_container* room_list);
 void delete_meeting(struct Ordered_container* room_list);
 void delete_person_from_meeting(struct Ordered_container* person_list, struct Ordered_container* room_list); 
@@ -70,6 +70,8 @@ struct Person* find_if_person_exists(const struct Ordered_container* person_list
 void read_person(char* firstname, char* lastname, char* phoneno);
 void read_person_lastname(char* lastname);
 struct Person* read_and_find_person(const struct Ordered_container* person_list);
+int is_person_in_meeting(void* meeting_ptr, void* person_ptr);
+int is_person_room(void* room_ptr, void* person_ptr);
 
 /* room helper functions */
 int validate_room_number(int* room_number);
@@ -189,7 +191,7 @@ int main() {
 			switch (command_two) {
 			case 'i':
 				/* (delete) individual command */
-				delete_individual(person_list);
+				delete_individual(person_list, room_list);
 				break;
 			case 'g':
 				/* (delete) all individuals command */
@@ -325,9 +327,9 @@ void add_person_to_meeting(struct Ordered_container* person_list, struct Ordered
 	/* check if meeting with that time in that room exists and valid */
 	if (!(meeting_ptr = read_and_find_meeting_and_room(room_list, &room_ptr))) { return; }
 	/* check if person in the people list */
-	if (!(person_ptr = read_and_find_person(person_list))) { return; }
+	else if (!(person_ptr = read_and_find_person(person_list))) { return; }
 	/* check if person is not already a participant */
-	if (!is_Meeting_participant_present(meeting_ptr, person_ptr)) {
+	else if (!is_Meeting_participant_present(meeting_ptr, person_ptr)) {
 		/* add person as a participant */
 		add_Meeting_participant(meeting_ptr, person_ptr);
 		printf("Participant %s added\n", get_Person_lastname(person_ptr));
@@ -443,10 +445,17 @@ delete functions
 */
 /* di <lastname> : delete a person from the people list but only if he or she is not a participant
 ina  meeting. Erros : No person of that name; person is a participant in a meeting. */
-void delete_individual(struct Ordered_container* person_list) {
+/* comparison function to see if */
+void delete_individual(struct Ordered_container* person_list, 
+	struct Ordered_container* room_list) {
 	struct Person* person_ptr; void* item_ptr;
 	/* search if person with the lastname exists */
 	if (!(person_ptr = read_and_find_person(person_list))) { return; }
+	/* check if persons is a participant */
+	else if (OC_apply_if_arg(room_list, is_person_room, person_ptr)) {
+		print_error_and_clear(IS_PARTICIPANT);
+		return;
+	}
 	/* delete cell / node that points to the individual */
 	item_ptr = OC_find_item(person_list, person_ptr);
 	OC_delete_item(person_list, item_ptr);
@@ -458,7 +467,7 @@ void delete_individual(struct Ordered_container* person_list) {
 /* dr <room> : delete the room with the specified number, including all of the
 meetings scheduled in that room -- conceptually, unless the meetings have been
 rescheduled into another room, taking the room out of the list of rooms means
-that its meetinsg are all cancelled. Errors : room number out of range, no room
+that its meetings are all cancelled. Errors : room number out of range, no room
 number. */
 void delete_room(struct Ordered_container* room_list) {
 	struct Room* room_ptr;
@@ -499,9 +508,9 @@ void delete_person_from_meeting(struct Ordered_container* person_list, struct Or
 	/* check if meeting with that time in that room exists and valid */
 	if (!(meeting_ptr = read_and_find_meeting_and_room(room_list, &room_ptr))) { return; }
 	/* check if person in the people list */
-	if (!(person_ptr = read_and_find_person(person_list))) { return; }
+	else if (!(person_ptr = read_and_find_person(person_list))) { return; }
 	/* check if person is not already a participant */
-	if (is_Meeting_participant_present(meeting_ptr, person_ptr)) {
+	else if (is_Meeting_participant_present(meeting_ptr, person_ptr)) {
 		/* add person as a participant */
 		remove_Meeting_participant(meeting_ptr, person_ptr);
 		printf("Participant %s deleted\n", get_Person_lastname(person_ptr));
@@ -534,7 +543,7 @@ specification is made for simplicity. Errors : There are scheduled meetings. */
 void delete_all_individuals(struct Ordered_container* person_list) {
 	/* check if there are no meetings */
 	if (g_Meeting_memory > 0) {
-		printf("Cannot clear people list unless there are no meetings!\n");
+		print_error_and_clear(MEETINGS_EXIST);
 		return;
 	}
 	/* deallocate the Person pointed to be the items */
@@ -564,7 +573,7 @@ void quit(struct Ordered_container* person_list, struct Ordered_container* room_
 
 
 /* 
-save data functions (sd) 
+save data functions 
 */
 void save_data(const struct Ordered_container* person_list,
 	const struct Ordered_container* room_list) {
@@ -572,7 +581,7 @@ void save_data(const struct Ordered_container* person_list,
 }
 
 /* 
-load data functions (ld)
+load data functions 
 */
 void load_data(const struct Ordered_container* person_list,
 	const struct Ordered_container* room_list) {
@@ -629,6 +638,17 @@ struct Person* read_and_find_person(const struct Ordered_container* person_list)
 	return person_ptr;
 }
 
+/* returns 1 if person in the meeting */
+int is_person_in_meeting(void* meeting_ptr, void* person_ptr) {
+	return is_Meeting_participant_present((struct Meeting*)meeting_ptr, (struct Person*)person_ptr);
+}
+
+/* returns 1 if person in the room */
+int is_person_room(void* room_ptr, void* person_ptr) {
+	return OC_apply_if_arg(get_Room_Meetings((struct Room*)room_ptr),
+		is_person_in_meeting, (struct Person*)person_ptr);
+}
+
 
 /* 
 room helper functions 
@@ -672,7 +692,7 @@ struct Room* read_and_find_room(const struct Ordered_container* room_list) {
 	/* read input information for room */
 	if (!(read_result = read_room(&room_number))) { return NULL; }
 	/* check if room number already exists */
-	if (!(item_ptr = find_if_room_exists(room_list, (const void*)&room_number)))
+	else if (!(item_ptr = find_if_room_exists(room_list, (const void*)&room_number)))
 		print_error_and_clear(ROOM_DOESNT_EXIST);
 	return (item_ptr != NULL) ? (struct Room*)OC_get_data_ptr(item_ptr) : NULL;
 }
@@ -722,7 +742,7 @@ int read_meeting(int* meeting_time, char* meeting_topic) {
 	int valid_results;
 	/* scanf error, starts with non-integer, or interrupted by typo */
 	if (!(scan_time_results = read_meeting_time(meeting_time))) { return 0; }
-	if (!(scan_topic_results = read_meeting_topic(meeting_topic))) { return 0; }
+	else if (!(scan_topic_results = read_meeting_topic(meeting_topic))) { return 0; }
 	/* out of range error */
 	return(valid_results = validate_meeting_time(meeting_time));
 }
@@ -785,43 +805,49 @@ error handling functions
 void print_error_and_clear(Error_c error) {
 	switch (error) {
 	case BAD_COMMAND:
-		printf("Unrecognized command!\n");
+		printf("Unrecognized command!\n"); //
 		break;
 	case READ_NO_INT:
-		printf("Could not read an integer value!\n");
+		printf("Could not read an integer value!\n"); //
 		break; 
 	case ROOM_OUT_OF_RANGE:
-		printf("Room number is not in range!\n");
+		printf("Room number is not in range!\n"); //
 		break;
 	case ROOM_ALREADY_EXISTS:
-		printf("There is already a room with this number!\n");
+		printf("There is already a room with this number!\n"); //
 		break;
 	case PERSON_ALREADY_EXISTS:
-		printf("There is already a person with this last name!\n");
+		printf("There is already a person with this last name!\n"); //
 		break;
 	case NO_PERSON:
-		printf("No person with that name!\n");
+		printf("No person with that name!\n"); //
 		break;
 	case ROOM_DOESNT_EXIST:
-		printf("No room with that number!\n");
+		printf("No room with that number!\n"); //
 		break;
 	case MEETING_ALREADY_EXIST:
-		printf("There is already a meeting at that time!\n");
+		printf("There is already a meeting at that time!\n"); //
 		break; 
 	case TIME_OUT_OF_RANGE:
 		printf("Time is not in range!\n");
 		break;
 	case MEETING_DOESNT_EXIST:
-		printf("No meeting at that time!\n");
+		printf("No meeting at that time!\n"); //
 		break;
 	case ALREADY_PARTICIPANT:
-		printf("This person is already a participant!\n");
+		printf("This person is already a participant!\n"); //
 		break;
 	case NOT_PARTICIPANT:
-		printf("This person is not a participant in the meeting!\n");
+		printf("This person is not a participant in the meeting!\n"); //
 		break;
 	case SAME_MEETING:
 		printf("Cannot reschedule to the same room and time!\n");
+		break;
+	case IS_PARTICIPANT:
+		printf("This person is a participant in a meeting!\n"); //
+		break; 
+	case MEETINGS_EXIST:
+		printf("Cannot clear people list unless there are no meetings!\n"); //
 		break;
 	default:
 		break;
