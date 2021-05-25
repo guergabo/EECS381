@@ -575,6 +575,8 @@ void quit(struct Ordered_container* person_list, struct Ordered_container* room_
 /* 
 save data functions 
 */
+/* sd <filename> — save data — writes the people, rooms, and meetings data to the named 
+file. Errors: the file cannot be opened for output. */
 void save_data(const struct Ordered_container* person_list,
 	const struct Ordered_container* room_list) {
 
@@ -583,6 +585,15 @@ void save_data(const struct Ordered_container* person_list,
 /* 
 load data functions 
 */
+/* ld <filename> — load data — restores the program state from the data in the file. 
+Errors: the file cannot be opened for input; invalid data is found in the file 
+(e.g. the file wasn't created by the program). In more detail, the program first 
+attempts to open the file, and if not successful simply reports the error and prompts 
+for a new command. If successful, it deletes all current data, and then attempts to 
+read the people, rooms, and meetings data from the named file, which should restore 
+the program state to be identical to the time the data was saved. If an error is detected 
+during reading the file, the error is reported and any data previously read is discarded, 
+leaving all the lists empty.*/
 void load_data(const struct Ordered_container* person_list,
 	const struct Ordered_container* room_list) {
 
