@@ -16,7 +16,7 @@ int g_string_memory = 0;
 
 /* safe malloc function */
 void* safe_malloc(int bytes) {
-	void* dynamic_memory = (void*)malloc(bytes);
+	void* dynamic_memory = malloc(bytes);
 	if (!dynamic_memory) {
 		printf("Memory allocation error. Could not allcoate %d bytes of memory", bytes);
 		exit(0);
@@ -26,7 +26,7 @@ void* safe_malloc(int bytes) {
 
 /* safe malloc for characters, make sure it is casted to char* */
 char* alloc_char(int bytes) {
-	char* dynamic_memory = (char*)safe_malloc(bytes);
+	char* dynamic_memory = safe_malloc(bytes);
 	/* global for string memory */
 	g_string_memory += bytes;
 

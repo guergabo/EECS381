@@ -317,7 +317,7 @@ void add_meeting(struct Ordered_container* room_list) {
 	print_error_and_clear(MEETING_ALREADY_EXIST);
 }
 
-/* ap <room> <time> <lastname> — add a specified person as a participant in a specified meeting. 
+/* ap <room> <time> <lastname> ï¿½ add a specified person as a participant in a specified meeting. 
 Errors: room number out of range; no room of that number; time out of range, no meeting at that 
 time, no person in the people list of that name; there is already a participant of that name.*/
 void add_person_to_meeting(struct Ordered_container* person_list, struct Ordered_container* room_list) {
@@ -339,7 +339,7 @@ void add_person_to_meeting(struct Ordered_container* person_list, struct Ordered
 	print_error_and_clear(ALREADY_PARTICIPANT);
 }
 
-/* rm <old room> <old time> <new room> <new time> — reschedule a meeting by changing its 
+/* rm <old room> <old time> <new room> <new time> ï¿½ reschedule a meeting by changing its 
 room and/or time (without changing or reentering topic or participants). Each parameter 
 is read and its value checked before going on to the next parameter. Actually changing 
 the schedule is not done until all parameters have been read and checked. Errors: old room
@@ -387,7 +387,7 @@ void print_individual(const struct Ordered_container* person_list) {
 		print_Person(person_ptr);
 }
 
-/* pr <room> — print the meetings in a room with the specified number. Errors: room number out of
+/* pr <room> ï¿½ print the meetings in a room with the specified number. Errors: room number out of
 range; no room of that number. */
 void print_room(const struct Ordered_container* room_list) {
 	struct Room* room_ptr;
@@ -396,7 +396,7 @@ void print_room(const struct Ordered_container* room_list) {
 		print_Room((const struct Room*)room_ptr);
 }
 
-/* pm <room> <time> — print the time, topic, and participants (full name and phone number) for
+/* pm <room> <time> ï¿½ print the time, topic, and participants (full name and phone number) for
 a specified meeting. Errors: room number out of range; no room of that number; time out of range
 , no meeting at that time. */
 void print_meeting(const struct Ordered_container* room_list) {
@@ -406,8 +406,8 @@ void print_meeting(const struct Ordered_container* room_list) {
 		print_Meeting(meeting_ptr);
 }
 
-/* ps — print the meeting information (same information as pm) for all meetings in all rooms. 
-Errors: none. (It is not an error if there are no meetings — that is a valid possibility.)*/
+/* ps ï¿½ print the meeting information (same information as pm) for all meetings in all rooms. 
+Errors: none. (It is not an error if there are no meetings ï¿½ that is a valid possibility.)*/
 void print_all_meetings(const struct Ordered_container* room_list) {
 	/* no rooms */
 	if (OC_empty(room_list)) { printf("List of rooms is empty\n"); return; }
@@ -426,7 +426,7 @@ void print_all_individuals(const struct Ordered_container* person_list) {
 	OC_apply(person_list, (OC_apply_fp_t)print_all_helper);                                 
 }
 
-/* pa — print memory allocations (described below). Errors: none. In this project, the command 
+/* pa ï¿½ print memory allocations (described below). Errors: none. In this project, the command 
 provides more detailed information about the amount of memory allocated than in Project 0. */
 void print_memory(const struct Ordered_container* person_list,
 			      const struct Ordered_container* room_list) {
@@ -483,7 +483,7 @@ void delete_room(struct Ordered_container* room_list) {
 	}
 }
 
-/* dm <room> <time> — delete a meeting. Errors: room number out of range; no room of that number;
+/* dm <room> <time> ï¿½ delete a meeting. Errors: room number out of range; no room of that number;
 time out of range; no meeting at that time. */
 void delete_meeting(struct Ordered_container* room_list) {
 	struct Room* room_ptr;
@@ -497,7 +497,7 @@ void delete_meeting(struct Ordered_container* room_list) {
 	}
 }
 
-/* dp <room> <time> <lastname> — delete a specified person from the participant list for a specified meeting. Errors: room
+/* dp <room> <time> <lastname> ï¿½ delete a specified person from the participant list for a specified meeting. Errors: room
 number out of range; no room of that number; time out of range, no meeting at that time, no person of 
 that name in the people list; no person of that name in the participant list. */
 void delete_person_from_meeting(struct Ordered_container* person_list, struct Ordered_container* room_list) {
@@ -530,7 +530,7 @@ void delete_all_rooms_and_meetings(struct Ordered_container* room_list) {
 	printf("%s\n", "All rooms and meetings deleted");
 }
 
-/* ds — delete schedule — delete all meetings from all rooms. Errors: none. */
+/* ds ï¿½ delete schedule ï¿½ delete all meetings from all rooms. Errors: none. */
 void delete_all_meetings(struct Ordered_container* room_list) {
 	OC_apply(room_list, delete_all_meetings_helper);
 	printf("All meetings deleted\n");
@@ -561,7 +561,7 @@ void delete_all(struct Ordered_container* person_list, struct Ordered_container*
 	delete_all_individuals(person_list);
 }
 
-/* qq — delete everything (as in da), and also delete the rooms and people lists, so that 
+/* qq ï¿½ delete everything (as in da), and also delete the rooms and people lists, so that 
 all memory is deallocated, and then terminate. Errors: none.*/
 void quit(struct Ordered_container* person_list, struct Ordered_container* room_list) {
 	delete_all(person_list, room_list); 
@@ -575,7 +575,7 @@ void quit(struct Ordered_container* person_list, struct Ordered_container* room_
 /* 
 save data functions 
 */
-/* sd <filename> — save data — writes the people, rooms, and meetings data to the named 
+/* sd <filename> ï¿½ save data ï¿½ writes the people, rooms, and meetings data to the named 
 file. Errors: the file cannot be opened for output. */
 void save_data(const struct Ordered_container* person_list,
 	const struct Ordered_container* room_list) {
@@ -598,7 +598,7 @@ void save_data(const struct Ordered_container* person_list,
 /* 
 load data functions 
 */
-/* ld <filename> — load data — restores the program state from the data in the file. 
+/* ld <filename> ï¿½ load data ï¿½ restores the program state from the data in the file. 
 Errors: the file cannot be opened for input; invalid data is found in the file 
 (e.g. the file wasn't created by the program). In more detail, the program first 
 attempts to open the file, and if not successful simply reports the error and prompts 
