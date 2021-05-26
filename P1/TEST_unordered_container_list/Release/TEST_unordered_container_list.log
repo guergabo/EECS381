@@ -1,9 +1,0 @@
-﻿  Ordered_container_list.c
-C:\Users\Gabriel\Desktop\C_C++\381\P1\TEST_unordered_container_list\Ordered_container_list.c(165,27): warning C4090: '=': different 'const' qualifiers
-  t_main.c
-  Utility.c
-  Generating code
-  Previous IPDB not found, fall back to full compilation.
-  All 10 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
-  Finished generating code
-  TEST_unordered_container_list.vcxproj -> C:\Users\Gabriel\Desktop\C_C++\381\P1\TEST_unordered_container_list\Release\TEST_unordered_container_list.exe
