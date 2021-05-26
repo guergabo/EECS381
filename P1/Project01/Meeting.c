@@ -101,7 +101,14 @@ void print_Meeting(const struct Meeting* meeting_ptr) {
 }
 
 /* Write the data in a Meeting to a file. The time is expressed in 12-hr form with no AM/PM.*/
+void save_meeting_helper(void* person_ptr, void* file_ptr) {
+	fprintf((FILE*)file_ptr, "%s\n", get_Person_lastname((const struct Person*)person_ptr));
+}
+
 void save_Meeting(const struct Meeting* meeting_ptr, FILE* outfile) {
+	fprintf(outfile, "%d %s %d\n", meeting_ptr->time, meeting_ptr->topic, 
+		OC_get_size(meeting_ptr->participants));
+	OC_apply_arg(meeting_ptr->participants, save_meeting_helper, (void*)outfile);
 	return;
 }
 
@@ -109,5 +116,29 @@ void save_Meeting(const struct Meeting* meeting_ptr, FILE* outfile) {
 return a pointer to it, NULL if invalid data discovered in file.
 No check made for whether the Meeting already exists or not. The time is expressed in 12-hr form with no AM/PM.*/
 struct Meeting* load_Meeting(FILE* input_file, const struct Ordered_container* people) {
-	return NULL;
+	struct Meeting* meeting_ptr;
+	void* item_ptr; 
+	char topic[TOPIC_BUFFER_SIZE];
+	char lastname[NAME_BUFFER_SIZE];
+	int time;
+	int num_of_participants; 
+
+	if (!(fscanf(input_file, "%d %14s %d", &time, topic, &num_of_participants))) {
+		return NULL; 
+	}
+	/* create new meeting to return */
+	meeting_ptr = create_Meeting(time, topic);
+
+	/* read last name and find person */
+	while (num_of_participants-- != 0) {
+		/* read last name of participants */
+		if (!(fscanf(input_file, "%35s", lastname)) || (!(item_ptr = OC_find_item_arg(people,
+			lastname, comp_func_person_arg)))) {
+			destroy_Meeting(meeting_ptr);
+			return NULL;
+		}
+		/* create participants */
+		add_Meeting_participant(meeting_ptr, OC_get_data_ptr(item_ptr));
+	}
+	return meeting_ptr; 
 }

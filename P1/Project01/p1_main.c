@@ -16,16 +16,12 @@
 #include <string.h>
 #include <limits.h>
 
-#define NAME_BUFFER_SIZE 36 
-#define PHONE_BUFFER_SIZE 11
-#define TOPIC_BUFFER_SIZE 15
-
 /* user defined data type. Assign names / states to integral constants */
 typedef enum {
 	BAD_COMMAND, READ_NO_INT, ROOM_OUT_OF_RANGE, ROOM_ALREADY_EXISTS,
 	PERSON_ALREADY_EXISTS, NO_PERSON, ROOM_DOESNT_EXIST, MEETING_ALREADY_EXIST,
 	TIME_OUT_OF_RANGE, MEETING_DOESNT_EXIST, ALREADY_PARTICIPANT, NOT_PARTICIPANT,
-	SAME_MEETING, IS_PARTICIPANT, MEETINGS_EXIST
+	SAME_MEETING, IS_PARTICIPANT, MEETINGS_EXIST, CANT_OPEN_FILE, INVALID_DATA
 } Error_c;
 
 /* function prototypes */
@@ -577,9 +573,54 @@ save data functions
 */
 /* sd <filename> — save data — writes the people, rooms, and meetings data to the named 
 file. Errors: the file cannot be opened for output. */
+void save_person_wrapper(void* person_ptr, void* file_ptr) {
+	save_Person((const struct Person*)person_ptr, (FILE*)file_ptr);
+}
+
+void save_room_wrapper(void* room_ptr, void* file_ptr) {
+	save_Room((const struct Room*)room_ptr, (FILE*)file_ptr);
+}
+
+void read_file_name(char* file_name) {
+	int result = scanf("%19s", file_name);
+}
+
+/*  Output File Streams in C
+	FILE* fopen(const char* path, const char* mode);
+	int fclose(FILE*);
+	int fprintf(FILE*, const char*, ...);
+	int fputs(char*, FILE*); "writes C-string to file upto but not including null byte"
+	stdout and stdin are simply FILE* objects
+*/
+void save_data_helper(const struct Ordered_container* person_list,
+	const struct Ordered_container* room_list, FILE* file_ptr) {
+
+	/* number of people */
+	fprintf(file_ptr, "%d\n", OC_get_size(person_list));
+	/* list of people */
+	OC_apply_arg(person_list, save_person_wrapper, (void*)file_ptr);
+	/* number of rooms */
+	fprintf(file_ptr, "%d\n", OC_get_size(room_list));
+	/* list of rooms with all there meetings */
+	OC_apply_arg(room_list, save_room_wrapper, (void*)file_ptr);
+}
+
 void save_data(const struct Ordered_container* person_list,
 	const struct Ordered_container* room_list) {
-
+	/* will create new file or replace old file */
+	FILE* file_ptr; 
+	char file_name[FILE_NAME_BUFFER_SIZE];
+	/* read in filename */
+	read_file_name(file_name);
+	/* OPEN */
+	if (!(file_ptr = fopen(file_name, "w"))) {
+		print_error_and_clear(CANT_OPEN_FILE);
+		return;
+	}
+	save_data_helper(person_list, room_list, file_ptr);
+	/* CLOSE */
+	fclose(file_ptr);
+	printf("Data saved\n");
 }
 
 /* 
@@ -594,9 +635,100 @@ read the people, rooms, and meetings data from the named file, which should rest
 the program state to be identical to the time the data was saved. If an error is detected 
 during reading the file, the error is reported and any data previously read is discarded, 
 leaving all the lists empty.*/
+
+/* deleta all but without the messaging */
+delete_all_clean(struct Ordered_container* person_list,
+	struct Ordered_container* room_list) {
+	/* rooms */
+	OC_apply(room_list, delete_all_rooms_helper);
+	OC_clear(room_list);
+	/* meetings*/
+	OC_apply(room_list, delete_all_meetings_helper);
+
+	/* check if there are no meetings */
+	if (g_Meeting_memory > 0) {
+		print_error_and_clear(MEETINGS_EXIST);
+		return;
+	}
+	/* deallocate the Person pointed to be the items */
+	OC_apply(person_list, (OC_apply_fp_t)delete_all_individuals_helper);
+	/* clear the container */
+	OC_clear(person_list);
+}
+/* if error is detected, report and discard everything */
+void print_error_and_discard(struct Ordered_container* person_list, 
+	struct Ordered_container* room_list) {
+	print_error_and_clear(INVALID_DATA);
+	delete_all_clean(person_list, room_list);
+}
+
+int load_persons(FILE* file_ptr, struct Ordered_container* person_list) {
+	struct Person* person_ptr;
+	int num_of_people; 
+
+	/* number of people */
+	if (!(fscanf(file_ptr, "%d", &num_of_people))) { return 1; }
+	/* list of people */
+	for (;num_of_people > 0; --num_of_people) {
+		if (!(person_ptr = load_Person(file_ptr)))
+			return 1; 
+		OC_insert(person_list, (void*)person_ptr);
+	}
+	return 0;
+}
+
+int load_rooms(FILE* file_ptr, struct Ordered_container* person_list,
+	struct Ordered_container* room_list) { 
+	struct Room* room_ptr; 
+	int num_of_rooms; 
+
+	/* number of rooms */
+	if (!(fscanf(file_ptr, "%d", &num_of_rooms))) { return 1; }
+	/* list of rooms */
+	for (;num_of_rooms > 0; --num_of_rooms) {
+		if (!(room_ptr = load_Room(file_ptr, person_list)))
+			return 1;
+		OC_insert(room_list, (void*)room_ptr);
+	}
+	return 0;
+}
+
 void load_data(const struct Ordered_container* person_list,
 	const struct Ordered_container* room_list) {
 
+	/*	Input File Streams in C
+		int fscanf(FILE*, const char*, ...); 
+		int fgetc(FILE*); int getchar(void); 
+
+		int ungetc(int c, FILE* stream); "unreads a character"
+		int feof(FILE*); "determines if the file is in an end-of-file state"
+
+		char* fgets(char*s, int n, FILE* f); "read a line into array of characters
+		with built-in protection against buffer overflow."
+
+		will return EOF if the attempt to process the request specified in the format string
+		results in an attempt to read pas the end of the file. 
+	*/
+	FILE* file_ptr;
+	char file_name[FILE_NAME_BUFFER_SIZE];
+
+	/* get filename to read */
+	read_file_name(file_name); 
+
+	/* OPEN */
+	if (!(file_ptr = fopen(file_name, "r"))) { print_error_and_clear(CANT_OPEN_FILE); return; }
+	
+	/* delete all current data, and load new data */
+	delete_all_clean(person_list, room_list);
+
+	/* load everthing */
+	if (load_persons(file_ptr, person_list) ||
+		load_rooms(file_ptr, person_list, room_list)) {
+		print_error_and_discard(person_list, room_list);
+	}
+	/* CLOSE */
+	fclose(file_ptr);
+	printf("Data loaded\n");
 }
 
 
@@ -859,6 +991,12 @@ void print_error_and_clear(Error_c error) {
 		break; 
 	case MEETINGS_EXIST:
 		printf("Cannot clear people list unless there are no meetings!\n"); //
+		break;
+	case CANT_OPEN_FILE:
+		printf("Could not open file!\n");
+		break;
+	case INVALID_DATA:
+		printf("Invalid data found in file!\n");
 		break;
 	default:
 		break;

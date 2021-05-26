@@ -3,6 +3,10 @@
 
 #include <string.h>
 
+#define NAME_BUFFER_SIZE 36 
+#define PHONE_BUFFER_SIZE 11
+#define TOPIC_BUFFER_SIZE 15
+#define FILE_NAME_BUFFER_SIZE 20
 
 /* number of bytes used in C-strings */
 extern int g_string_memory;
@@ -17,7 +21,7 @@ void* safe_malloc(int bytes);
 char* alloc_char(int bytes);
 
 /* safe malloc for characters, make sure it is casted to char */
-char* free_char(char* char_ptr);
+void free_char(char* char_ptr);
 
 /* safe malloc for characters, make sure it is casted to char* */
 struct Ordered_container* alloc_container(int bytes);

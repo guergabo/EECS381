@@ -1,5 +1,7 @@
 /* Room.c */
 
+/* allows me to use normal scanf, strcpy not scanf_s, etc. */
+#pragma warning(disable : 4996)
 
 #include "Utility.h"
 #include "Ordered_container.h"
@@ -106,14 +108,38 @@ void print_Room(const struct Room* room_ptr) {
 		OC_apply(room_ptr->meetings, (OC_apply_fp_t)print_meetings_helper);
 }
 
+void save_room_helper(void* meeting_ptr, void* file_ptr) {
+	save_Meeting((const struct Meeting*)meeting_ptr, (FILE*)file_ptr);
+}
+
 /* Write the room data to a file. */
 void save_Room(const struct Room* room_ptr, FILE* outfile) {
-	return;
+	/* room number and number of meetings */
+	fprintf(outfile, "%d %d\n", room_ptr->number, OC_get_size(room_ptr->meetings));
+	/* each meeting in the room, time, topic, number of participants */
+	OC_apply_arg(room_ptr->meetings, save_room_helper, (void*)outfile);
 }
 
 /* Read a room's data from a file stream, create the data object and
 return a pointer to it, NULL if invalid data discovered in file.
 No check made for whether the room already exists or not. */
 struct Room* load_Room(FILE* infile, const struct Ordered_container* people) {
-	return NULL;
+	struct Room* room_ptr; 
+	int temp_number;
+	int temp_num_of_meetings;
+
+	if (!(fscanf(infile, "%d %d\n", &temp_number, &temp_num_of_meetings))) { return NULL; }
+
+	/* create meetings and participants for the room */
+	room_ptr = create_Room(temp_number);
+	/* add all the meetings in the room */
+	while (temp_num_of_meetings-- !=  0) {
+		struct Meeting* meeting_ptr = load_Meeting(infile, people);
+		if (!meeting_ptr) {
+			destroy_Room(room_ptr);
+			return NULL;
+		}
+		add_Room_Meeting(room_ptr, meeting_ptr);
+	}
+	return room_ptr; 
 }
