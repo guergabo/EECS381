@@ -1,10 +1,12 @@
-/* Person.c */
+/* Person.c, implementation file for Person object and functionality */
 
 #pragma warning(disable : 4996) /* lets me use normal library functions */
 
+/* interfaces */
 #include "Utility.h"
 #include "Person.h"
 
+/* libraries */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

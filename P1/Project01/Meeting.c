@@ -1,12 +1,14 @@
-/* Meeting.c */
+/* Meeting.c, implementation file for Meeting object and functionality */
 
 #pragma warning(disable : 4996)
 
+/* interfaces */
 #include "Utility.h"
 #include "Ordered_container.h"
 #include "Person.h"
 #include "Meeting.h"
 
+/* libraries */
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>

@@ -1,11 +1,12 @@
-/* Utility.c */
+/* Utility.c, implementation file for Utility functionality */
 
+/* interfaces */
 #include "Utility.h"
 #include "Person.h"
 #include "Meeting.h"
 #include "Room.h"
 
-
+/* libraries */
 #include <stdio.h>
 #include <stdlib.h> /* standard library, includes malloc/free */
 #include <string.h> /* contains compare strings function strcmp */

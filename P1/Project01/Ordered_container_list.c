@@ -1,9 +1,10 @@
-/* Ordered_container_list.c */
+/* Ordered_container_list.c, linked-list implementation file for Ordered_container and functionality */
 
+/* interfaces */
 #include "Utility.h"
 #include "Ordered_container.h"
 
-
+/* libraries */
 #include <stdio.h>  /* defines NULL */
 #include <stdlib.h> /* standard library, includes malloc/free */
 #include <assert.h>

@@ -1,6 +1,11 @@
+# To ignore all visual studio project configuration files 
 .vs
 Debug
 Project01.sln
 Project01.vcxproj
 Project01.vcxproj.filters
 Project01.vcxproj.user
+
+# To ignore all executables and binary files
+*.o
+*.exe

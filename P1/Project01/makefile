@@ -66,7 +66,7 @@ Room.o: Room.c Room.h Ordered_container.h Meeting.h Utility.h
 	$(CC) $(CFLAGS) Room.c
 
 #include Person.h here only if your Utilities.c must include it.
-Utility.o: Utility.c Utility.h Person.h
+Utility.o: Utility.c Utility.h Person.h Meeting.h Room.h
 	$(CC) $(CFLAGS) Utility.c
 
 # other shell commands can appear as "things to do" - not just compilations, etc.

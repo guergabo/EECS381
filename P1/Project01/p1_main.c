@@ -57,7 +57,7 @@ void quit(struct Ordered_container* person_list, struct Ordered_container* room_
 void save_data(const struct Ordered_container* person_list, const struct Ordered_container* room_list);
 
 /* load data functions */
-void load_data(const struct Ordered_container* person_list, const struct Ordered_container* room_list);
+void load_data(struct Ordered_container* person_list, struct Ordered_container* room_list);
 
 /* person helper functions */
 void print_all_helper(void* data_ptr);
@@ -84,16 +84,22 @@ int read_meeting_time_and_validate(int* meeting_time);
 int read_meeting_topic(char* meeting_topic);
 int read_meeting(int* meeting_time, char* meeting_topic);
 struct Meeting* read_and_find_meeting(const struct Ordered_container* room_list);
-struct Meeting* read_and_find_meeting_and_room(const struct Ordered_container* room_list, const struct Room** room_ptr);
-void print_all_meetings_helper(const void* data_ptr);
+struct Meeting* read_and_find_meeting_and_room(const struct Ordered_container* room_list, struct Room** room_ptr);
+void print_all_meetings_helper(void* data_ptr);
 void delete_all_meetings_helper(void* room_ptr);
 void reschedule_helper(struct Meeting* meeting_ptr_1, struct Room* room_ptr_1, struct Room* room_ptr_2, int new_meeting_time);
 
 /* save data helper functions */
-
+void save_person_wrapper(void* person_ptr, void* file_ptr);
+void save_room_wrapper(void* room_ptr, void* file_ptr);
+void read_file_name(char* file_name);
+void save_data_helper(const struct Ordered_container* person_list, const struct Ordered_container* room_list, FILE* file_ptr);
 
 /* load data helper functions */
-
+void delete_all_clean(struct Ordered_container* person_list, struct Ordered_container* room_list);
+void print_error_and_discard(struct Ordered_container* person_list, struct Ordered_container* room_list);
+int load_persons(FILE* file_ptr, struct Ordered_container* person_list);
+int load_rooms(FILE* file_ptr, struct Ordered_container* person_list, struct Ordered_container* room_list);
 
 /* error handling functions */
 void print_error_and_clear(Error_c error);
@@ -101,11 +107,10 @@ void print_error_and_clear(Error_c error);
 int main() {
 	/* containers */
 	struct Ordered_container* person_list = OC_create_container(comp_func_person);
-	struct Ordered_container* room_list = OC_create_container(comp_func_meeting);
+	struct Ordered_container* room_list = OC_create_container(comp_func_room);
 	/* two character commands define program behavior */
 	char command_one;
 	char command_two;
-
 	/* main behavior loop */
 	while (1) {
 		/* read the two command characters */
@@ -408,7 +413,7 @@ void print_all_meetings(const struct Ordered_container* room_list) {
 	if (OC_empty(room_list)) { printf("List of rooms is empty\n"); return; }
 	/* rooms  */
 	printf("Information for %d rooms:\n", OC_get_size(room_list));
-	OC_apply(room_list, print_all_meetings_helper);
+	OC_apply(room_list, (OC_apply_fp_t)print_all_meetings_helper);
 }
 
 /* pg : print the individual information (same information as pi) for all people in the person list.
@@ -441,7 +446,6 @@ delete functions
 */
 /* di <lastname> : delete a person from the people list but only if he or she is not a participant
 ina  meeting. Erros : No person of that name; person is a participant in a meeting. */
-/* comparison function to see if */
 void delete_individual(struct Ordered_container* person_list, 
 	struct Ordered_container* room_list) {
 	struct Person* person_ptr; void* item_ptr;
@@ -573,38 +577,6 @@ save data functions
 */
 /* sd <filename> — save data — writes the people, rooms, and meetings data to the named 
 file. Errors: the file cannot be opened for output. */
-void save_person_wrapper(void* person_ptr, void* file_ptr) {
-	save_Person((const struct Person*)person_ptr, (FILE*)file_ptr);
-}
-
-void save_room_wrapper(void* room_ptr, void* file_ptr) {
-	save_Room((const struct Room*)room_ptr, (FILE*)file_ptr);
-}
-
-void read_file_name(char* file_name) {
-	int result = scanf("%19s", file_name);
-}
-
-/*  Output File Streams in C
-	FILE* fopen(const char* path, const char* mode);
-	int fclose(FILE*);
-	int fprintf(FILE*, const char*, ...);
-	int fputs(char*, FILE*); "writes C-string to file upto but not including null byte"
-	stdout and stdin are simply FILE* objects
-*/
-void save_data_helper(const struct Ordered_container* person_list,
-	const struct Ordered_container* room_list, FILE* file_ptr) {
-
-	/* number of people */
-	fprintf(file_ptr, "%d\n", OC_get_size(person_list));
-	/* list of people */
-	OC_apply_arg(person_list, save_person_wrapper, (void*)file_ptr);
-	/* number of rooms */
-	fprintf(file_ptr, "%d\n", OC_get_size(room_list));
-	/* list of rooms with all there meetings */
-	OC_apply_arg(room_list, save_room_wrapper, (void*)file_ptr);
-}
-
 void save_data(const struct Ordered_container* person_list,
 	const struct Ordered_container* room_list) {
 	/* will create new file or replace old file */
@@ -635,92 +607,18 @@ read the people, rooms, and meetings data from the named file, which should rest
 the program state to be identical to the time the data was saved. If an error is detected 
 during reading the file, the error is reported and any data previously read is discarded, 
 leaving all the lists empty.*/
+void load_data(struct Ordered_container* person_list,
+	 struct Ordered_container* room_list) {
 
-/* deleta all but without the messaging */
-delete_all_clean(struct Ordered_container* person_list,
-	struct Ordered_container* room_list) {
-	/* rooms */
-	OC_apply(room_list, delete_all_rooms_helper);
-	OC_clear(room_list);
-	/* meetings*/
-	OC_apply(room_list, delete_all_meetings_helper);
-
-	/* check if there are no meetings */
-	if (g_Meeting_memory > 0) {
-		print_error_and_clear(MEETINGS_EXIST);
-		return;
-	}
-	/* deallocate the Person pointed to be the items */
-	OC_apply(person_list, (OC_apply_fp_t)delete_all_individuals_helper);
-	/* clear the container */
-	OC_clear(person_list);
-}
-/* if error is detected, report and discard everything */
-void print_error_and_discard(struct Ordered_container* person_list, 
-	struct Ordered_container* room_list) {
-	print_error_and_clear(INVALID_DATA);
-	delete_all_clean(person_list, room_list);
-}
-
-int load_persons(FILE* file_ptr, struct Ordered_container* person_list) {
-	struct Person* person_ptr;
-	int num_of_people; 
-
-	/* number of people */
-	if (!(fscanf(file_ptr, "%d", &num_of_people))) { return 1; }
-	/* list of people */
-	for (;num_of_people > 0; --num_of_people) {
-		if (!(person_ptr = load_Person(file_ptr)))
-			return 1; 
-		OC_insert(person_list, (void*)person_ptr);
-	}
-	return 0;
-}
-
-int load_rooms(FILE* file_ptr, struct Ordered_container* person_list,
-	struct Ordered_container* room_list) { 
-	struct Room* room_ptr; 
-	int num_of_rooms; 
-
-	/* number of rooms */
-	if (!(fscanf(file_ptr, "%d", &num_of_rooms))) { return 1; }
-	/* list of rooms */
-	for (;num_of_rooms > 0; --num_of_rooms) {
-		if (!(room_ptr = load_Room(file_ptr, person_list)))
-			return 1;
-		OC_insert(room_list, (void*)room_ptr);
-	}
-	return 0;
-}
-
-void load_data(const struct Ordered_container* person_list,
-	const struct Ordered_container* room_list) {
-
-	/*	Input File Streams in C
-		int fscanf(FILE*, const char*, ...); 
-		int fgetc(FILE*); int getchar(void); 
-
-		int ungetc(int c, FILE* stream); "unreads a character"
-		int feof(FILE*); "determines if the file is in an end-of-file state"
-
-		char* fgets(char*s, int n, FILE* f); "read a line into array of characters
-		with built-in protection against buffer overflow."
-
-		will return EOF if the attempt to process the request specified in the format string
-		results in an attempt to read pas the end of the file. 
-	*/
 	FILE* file_ptr;
 	char file_name[FILE_NAME_BUFFER_SIZE];
 
 	/* get filename to read */
 	read_file_name(file_name); 
-
 	/* OPEN */
 	if (!(file_ptr = fopen(file_name, "r"))) { print_error_and_clear(CANT_OPEN_FILE); return; }
-	
 	/* delete all current data, and load new data */
 	delete_all_clean(person_list, room_list);
-
 	/* load everthing */
 	if (load_persons(file_ptr, person_list) ||
 		load_rooms(file_ptr, person_list, room_list)) {
@@ -909,7 +807,7 @@ struct Meeting* read_and_find_meeting(const struct Ordered_container* room_list)
 }
 
 struct Meeting* read_and_find_meeting_and_room(const struct Ordered_container* room_list,
-	const struct Room** room_ptr) {
+	struct Room** room_ptr) {
 	struct Meeting* meeting_ptr;
 	int meeting_time;
 
@@ -924,7 +822,7 @@ struct Meeting* read_and_find_meeting_and_room(const struct Ordered_container* r
 }
 
 /* Print the data in a struct Room. */
-void print_all_meetings_helper(const void* data_ptr) {
+void print_all_meetings_helper(void* data_ptr) {
 	print_Room((struct Room*)data_ptr);
 }
 
@@ -941,6 +839,97 @@ void reschedule_helper(struct Meeting* meeting_ptr_1, struct Room* room_ptr_1,
 	add_Room_Meeting(room_ptr_2, meeting_ptr_1);
 
 }
+
+/*
+save data helper functions 
+*/
+void save_person_wrapper(void* person_ptr, void* file_ptr) {
+	save_Person((const struct Person*)person_ptr, (FILE*)file_ptr);
+}
+
+void save_room_wrapper(void* room_ptr, void* file_ptr) {
+	save_Room((const struct Room*)room_ptr, (FILE*)file_ptr);
+}
+
+void read_file_name(char* file_name) {
+	int result = scanf("%19s", file_name);
+}
+
+void save_data_helper(const struct Ordered_container* person_list,
+	const struct Ordered_container* room_list, FILE* file_ptr) {
+
+	/* number of people */
+	fprintf(file_ptr, "%d\n", OC_get_size(person_list));
+	/* list of people */
+	OC_apply_arg(person_list, save_person_wrapper, (void*)file_ptr);
+	/* number of rooms */
+	fprintf(file_ptr, "%d\n", OC_get_size(room_list));
+	/* list of rooms with all there meetings */
+	OC_apply_arg(room_list, save_room_wrapper, (void*)file_ptr);
+}
+
+
+/*
+load data helper functions
+*/
+/* deleta all but without the messaging */
+void delete_all_clean(struct Ordered_container* person_list,
+	struct Ordered_container* room_list) {
+	/* rooms */
+	OC_apply(room_list, delete_all_rooms_helper);
+	OC_clear(room_list);
+	/* meetings*/
+	OC_apply(room_list, delete_all_meetings_helper);
+
+	/* check if there are no meetings */
+	if (g_Meeting_memory > 0) {
+		print_error_and_clear(MEETINGS_EXIST);
+		return;
+	}
+	/* deallocate the Person pointed to be the items */
+	OC_apply(person_list, (OC_apply_fp_t)delete_all_individuals_helper);
+	/* clear the container */
+	OC_clear(person_list);
+}
+
+/* if error is detected, report and discard everything */
+void print_error_and_discard(struct Ordered_container* person_list,
+	struct Ordered_container* room_list) {
+	print_error_and_clear(INVALID_DATA);
+	delete_all_clean(person_list, room_list);
+}
+
+int load_persons(FILE* file_ptr, struct Ordered_container* person_list) {
+	struct Person* person_ptr;
+	int num_of_people;
+
+	/* number of people */
+	if (!(fscanf(file_ptr, "%d", &num_of_people))) { return 1; }
+	/* list of people */
+	for (;num_of_people > 0; --num_of_people) {
+		if (!(person_ptr = load_Person(file_ptr)))
+			return 1;
+		OC_insert(person_list, (void*)person_ptr);
+	}
+	return 0;
+}
+
+int load_rooms(FILE* file_ptr, struct Ordered_container* person_list,
+	struct Ordered_container* room_list) {
+	struct Room* room_ptr;
+	int num_of_rooms;
+
+	/* number of rooms */
+	if (!(fscanf(file_ptr, "%d", &num_of_rooms))) { return 1; }
+	/* list of rooms */
+	for (;num_of_rooms > 0; --num_of_rooms) {
+		if (!(room_ptr = load_Room(file_ptr, person_list)))
+			return 1;
+		OC_insert(room_list, (void*)room_ptr);
+	}
+	return 0;
+}
+
 
 /* 
 error handling functions 

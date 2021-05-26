@@ -1,13 +1,15 @@
-/* Room.c */
+/* Room.c, implementation file for Room object and functionality */
 
 /* allows me to use normal scanf, strcpy not scanf_s, etc. */
 #pragma warning(disable : 4996)
 
+/* interfaces */
 #include "Utility.h"
 #include "Ordered_container.h"
 #include "Meeting.h"
 #include "Room.h"
 
+/* libraries */
 #include <stdlib.h>
 #include <string.h>
 
