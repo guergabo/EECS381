@@ -1,0 +1,3 @@
+# To ignore all executables and binary files
+*.o
+*.exe
